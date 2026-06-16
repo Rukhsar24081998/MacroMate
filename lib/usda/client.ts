@@ -1,0 +1,118 @@
+import type { FoodDetailResponse, FoodSearchResult } from "@/types/api";
+import { cacheKey, getCached, setCached } from "./cache";
+import {
+  DEFAULT_DATA_TYPES,
+  DEFAULT_SEARCH_PAGE_SIZE,
+  USDA_API_BASE_URL,
+  USDA_REQUEST_TIMEOUT_MS,
+} from "./constants";
+import { normalizeFoodDetail, normalizeSearchResponse } from "./normalizers";
+
+export class UsdaApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code: string,
+  ) {
+    super(message);
+    this.name = "UsdaApiError";
+  }
+}
+
+function getApiKey(): string {
+  const key = process.env.USDA_API_KEY;
+  if (!key) {
+    throw new UsdaApiError(
+      "USDA API key is not configured",
+      500,
+      "CONFIG_ERROR",
+    );
+  }
+  return key;
+}
+
+async function usdaFetch(path: string, params: Record<string, string>): Promise<Response> {
+  const url = new URL(`${USDA_API_BASE_URL}${path}`);
+  url.searchParams.set("api_key", getApiKey());
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
+
+  const response = await fetch(url.toString(), {
+    signal: AbortSignal.timeout(USDA_REQUEST_TIMEOUT_MS),
+    headers: { Accept: "application/json" },
+    next: { revalidate: 0 },
+  });
+
+  if (process.env.NODE_ENV === "development") {
+    const remaining = response.headers.get("X-RateLimit-Remaining");
+    if (remaining != null) {
+      console.info(`[USDA] Rate limit remaining: ${remaining}`);
+    }
+  }
+
+  return response;
+}
+
+function mapUsdaStatus(status: number): UsdaApiError {
+  switch (status) {
+    case 403:
+      return new UsdaApiError("Invalid USDA API key", 500, "CONFIG_ERROR");
+    case 404:
+      return new UsdaApiError("Food not found", 404, "NOT_FOUND");
+    case 429:
+      return new UsdaApiError(
+        "Search temporarily unavailable. Please try again in a few minutes.",
+        429,
+        "RATE_LIMITED",
+      );
+    default:
+      if (status >= 500) {
+        return new UsdaApiError(
+          "USDA service is temporarily unavailable",
+          502,
+          "UPSTREAM_ERROR",
+        );
+      }
+      return new UsdaApiError("Unexpected USDA API error", 502, "UPSTREAM_ERROR");
+  }
+}
+
+export async function searchFoods(
+  query: string,
+  page = 1,
+  pageSize = DEFAULT_SEARCH_PAGE_SIZE,
+): Promise<FoodSearchResult> {
+  const key = cacheKey("search", query.toLowerCase(), page, pageSize);
+  const cached = getCached<FoodSearchResult>(key);
+  if (cached) return cached;
+
+  const response = await usdaFetch("/foods/search", {
+    query,
+    pageSize: String(pageSize),
+    pageNumber: String(page),
+    dataType: DEFAULT_DATA_TYPES.join(","),
+  });
+
+  if (!response.ok) throw mapUsdaStatus(response.status);
+
+  const raw = await response.json();
+  const result = normalizeSearchResponse(raw, pageSize);
+  setCached(key, result);
+  return result;
+}
+
+export async function getFoodById(fdcId: number): Promise<FoodDetailResponse> {
+  const key = cacheKey("food", fdcId);
+  const cached = getCached<FoodDetailResponse>(key);
+  if (cached) return cached;
+
+  const response = await usdaFetch(`/food/${fdcId}`, {});
+
+  if (!response.ok) throw mapUsdaStatus(response.status);
+
+  const raw = await response.json();
+  const result = normalizeFoodDetail(raw);
+  setCached(key, result);
+  return result;
+}
