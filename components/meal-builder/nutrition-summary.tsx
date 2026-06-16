@@ -29,14 +29,7 @@ export function NutritionSummary() {
             Add ingredients to see meal-level calories and macros.
           </Alert>
         ) : (
-          <>
-            <div className="hidden lg:block">
-              <MealTotals totals={totals} layout="desktop" />
-            </div>
-            <div className="lg:hidden">
-              <MealTotals totals={totals} layout="mobile" />
-            </div>
-          </>
+          <MealTotals totals={totals} />
         )}
       </Card>
     </section>

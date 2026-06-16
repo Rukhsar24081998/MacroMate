@@ -14,7 +14,6 @@ export function MealIngredientList() {
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-gray-900">Meal Ingredients</h2>
-          <p className="mt-0.5 text-sm text-gray-500 lg:hidden">Current Meal</p>
         </div>
         <ClearMealButton />
       </div>

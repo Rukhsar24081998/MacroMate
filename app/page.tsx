@@ -27,20 +27,12 @@ export default function HomePage() {
       </div>
 
       <Card className="overflow-hidden p-0">
-        <div className="grid gap-0 sm:grid-cols-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/screens/meal-builder-desktop.png"
-            alt="MacroMate meal builder desktop preview"
-            className="hidden h-full w-full object-cover object-top sm:block"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/screens/meal-builder-mobile.png"
-            alt="MacroMate meal builder mobile preview"
-            className="h-full w-full object-cover object-top sm:max-w-[220px] sm:justify-self-center"
-          />
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/screens/meal-builder-desktop.png"
+          alt="MacroMate meal builder preview"
+          className="h-full w-full object-cover object-top"
+        />
       </Card>
     </div>
   );

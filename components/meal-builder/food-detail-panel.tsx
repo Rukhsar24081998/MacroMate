@@ -102,9 +102,6 @@ export function FoodDetailPanel({
             </div>
 
             <div className="mt-5 rounded-2xl bg-surface-muted p-4">
-              <p className="mb-3 text-sm font-semibold text-gray-900 lg:hidden">
-                Set Ingredient Quantity
-              </p>
               <QuantityInput food={food} onChange={handleQuantityChange} disabled={isLoadingDetail} />
             </div>
 

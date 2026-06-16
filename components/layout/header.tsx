@@ -76,15 +76,6 @@ export function Header() {
         >
           Sign In
         </button>
-
-        {isMealBuilder ? (
-          <div
-            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-xs font-semibold text-gray-500 md:hidden"
-            aria-hidden="true"
-          >
-            RK
-          </div>
-        ) : null}
       </div>
     </header>
   );

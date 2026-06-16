@@ -17,8 +17,6 @@ import { SearchResultsList } from "./search-results-list";
 import { SearchResultsSkeleton } from "./search-results-skeleton";
 import { SearchStatus } from "./search-status";
 
-const MOBILE_FILTER_CHIPS = ["Frequent", "Favorites", "Recent", "USDA"] as const;
-
 export function FoodSearchSection() {
   const search = useFoodSearch();
   const [resultsDismissed, setResultsDismissed] = useState(false);
@@ -89,21 +87,6 @@ export function FoodSearchSection() {
                 : undefined
             }
           />
-        </div>
-
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
-          {MOBILE_FILTER_CHIPS.map((chip, index) => (
-            <span
-              key={chip}
-              className={
-                index === 3
-                  ? "shrink-0 rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-800"
-                  : "shrink-0 rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-gray-500"
-              }
-            >
-              {chip}
-            </span>
-          ))}
         </div>
 
         <div className="mt-3" aria-live="polite">
