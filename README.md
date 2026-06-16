@@ -41,6 +41,39 @@ MacroMate solves this with a single workflow: **search → quantity → add → 
 
 ---
 
+## Architecture
+
+![MacroMate Architecture](docs/screenshots/architecture-diagram.png)
+
+MacroMate is a **client-heavy, server-proxied** Next.js application. The browser owns meal state and all nutrition calculations; the Next.js server acts as a thin API proxy to USDA FoodData Central, keeping the API key off the client.
+
+### Layers
+
+| Layer | Role |
+|-------|------|
+| **User** | Interacts via the browser to search foods, configure quantities, and build meals. |
+| **Frontend (Next.js)** | Four UI surfaces: Food Search, Selected Food Panel, Meal Builder, and Nutrition Summary Dashboard. |
+| **State** | `MealProvider` (React Context), custom hooks (`useMeal`, `useFoodSearch`), and session persistence sync meal data in memory and to `sessionStorage`. |
+| **API** | Server route handlers `/api/foods/search` and `/api/foods/[fdcId]` validate input, proxy requests, and normalize USDA responses. |
+| **External Service** | USDA FoodData Central API provides food search and per-100g nutrient profiles. |
+| **Business Logic** | Pure TypeScript functions handle search normalization, quantity conversion, nutrition scaling, and meal total calculation. |
+| **Storage** | `sessionStorage` persists the ingredient list across page refresh (no database in MVP). |
+
+### Data flow
+
+1. User searches for a food in the browser.
+2. The frontend calls a Next.js API route.
+3. The route proxies the request to USDA FoodData Central.
+4. Normalized nutrition data is returned to the client.
+5. The user adds ingredients to the meal builder.
+6. The nutrition engine scales macros by quantity.
+7. The summary dashboard updates meal totals.
+8. Ingredients are saved to `sessionStorage`.
+
+See [`docs/technical_architecture.md`](docs/technical_architecture.md) for the full technical write-up.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
