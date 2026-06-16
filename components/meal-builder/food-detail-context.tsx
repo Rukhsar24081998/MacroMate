@@ -49,10 +49,10 @@ export function FoodDetailContext({ food, className }: FoodDetailContextProps) {
   const referenceBasis = formatReferenceBasis(food);
 
   return (
-    <div className={cn("space-y-3 pt-1", className)}>
+    <div className={cn("space-y-3 border-t border-gray-100 pt-4", className)}>
       <section
         aria-label="About this food"
-        className="rounded-xl border border-brand-100/80 bg-brand-50/50 p-3.5"
+        className="rounded-xl border border-brand-200 bg-brand-50 p-3.5 shadow-sm"
       >
         <div className="flex items-start gap-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700">
@@ -97,7 +97,7 @@ export function FoodDetailContext({ food, className }: FoodDetailContextProps) {
 
       <section
         aria-label="Tip"
-        className="rounded-xl border border-blue-100/80 bg-blue-50/40 p-3.5"
+        className="rounded-xl border border-blue-200 bg-blue-50/70 p-3.5 shadow-sm"
       >
         <div className="flex items-start gap-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">

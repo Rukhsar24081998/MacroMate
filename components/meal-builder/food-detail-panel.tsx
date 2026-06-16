@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useFoodDetailReveal } from "@/lib/hooks/use-food-detail-reveal";
@@ -52,12 +52,31 @@ export function FoodDetailPanel({
 
   const isReadyToFocus = Boolean(food && nutrition && !isLoadingDetail && !error);
 
+  const contextRef = useRef<HTMLDivElement>(null);
+
   const { panelRef, highlighted } = useFoodDetailReveal({
     fdcId: food?.fdcId,
     isReadyToFocus,
     onFocusQuantity: focusQuantityInput,
     enableScrollReveal,
   });
+
+  useEffect(() => {
+    if (!nutrition || !food || enableScrollReveal) return;
+
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const timer = window.setTimeout(() => {
+      contextRef.current?.scrollIntoView({
+        behavior: reducedMotion ? "auto" : "smooth",
+        block: "nearest",
+      });
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [food?.fdcId, nutrition, enableScrollReveal]);
 
   if (!food && !isLoadingDetail && !error) return null;
 
@@ -143,7 +162,9 @@ export function FoodDetailPanel({
                 disabled={isLoadingDetail}
               />
 
-              <FoodDetailContext food={food} />
+              <div ref={contextRef} className="scroll-mt-2">
+                <FoodDetailContext food={food} />
+              </div>
             </>
           ) : null}
         </div>
