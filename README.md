@@ -2,7 +2,9 @@
 
 Build custom meals and calculate calories and macronutrients in under one minute — powered by [USDA FoodData Central](https://fdc.nal.usda.gov/).
 
-**Live demo:** _Add your Vercel URL after deployment_
+**Live Demo:** _Add your Vercel URL after deployment_
+
+**GitHub Repository:** [github.com/Rukhsar24081998/MacroMate](https://github.com/Rukhsar24081998/MacroMate)
 
 ---
 
@@ -14,30 +16,37 @@ MacroMate solves this with a single workflow: **search → quantity → add → 
 
 ---
 
-## Features
+## Why I Built MacroMate
 
-- **USDA food search** — debounced search with loading, empty, and error states
-- **Search normalization** — common names (e.g. omelette, paneer bhurji, roti) map to USDA-friendly terms
-- **Quantity input** — grams, milliliters, or servings (when USDA serving data exists)
-- **Meal builder** — add, edit, and remove multiple ingredients
-- **Nutrition summary** — calories, protein, carbs, fat, and fiber totals
-- **Session persistence** — meal survives page refresh via `sessionStorage`
-- **Keyboard search** — arrow keys, Enter, and Escape for mouse-free selection
-- **Mobile-friendly layout** — responsive meal builder with accessible tap targets
+I built MacroMate during my own fitness journey, when hitting daily calorie and protein targets meant manually adding up labels, guessing portions, and rebuilding the same meals in spreadsheets every week.
+
+Custom meals — eggs, chicken, rice, snacks combined on one plate — were especially painful. Existing tools were built around logging packaged foods or full recipes, not the way I actually ate.
+
+MacroMate is the product I wanted: search real foods, set a quantity, build a meal, and see the nutrition impact immediately. The goal is to make meal nutrition tracking fast enough that it becomes a habit, not a chore.
 
 ---
 
-## Tech Stack
+## Key Product Decisions
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 |
-| Data source | USDA FoodData Central API v1 |
-| State | React Context + custom hooks |
-| Persistence | `sessionStorage` (meal only) |
-| Tests | Vitest + Testing Library |
+### USDA FoodData Central as Source of Truth
+
+USDA FoodData Central is the authoritative public nutrition database for the United States. MacroMate uses it as the **single source of truth** instead of maintaining a custom food database.
+
+That choice keeps data standardized and credible, reduces long-term maintenance, and lets the product focus on UX and calculation logic rather than curating nutrition tables.
+
+**Trade-offs:** USDA naming does not always match how people search (e.g. cultural dish names). Some Foundation foods list nutrition per 100g without household serving sizes. MacroMate addresses discoverability with search normalization and serving-size fallbacks where USDA provides portion data — without replacing USDA as the underlying data source.
+
+### Dashboard-Based Meal Builder
+
+Early layouts treated search, food detail, and meal summary as stacked sections on one page. User testing showed too much scrolling and lost context — especially when adjusting quantity after selecting a food.
+
+The product was redesigned into a **three-column dashboard**: search on the left, selected food and quantity in the center, and meal summary on the right. That layout keeps the full workflow visible on desktop and preserves the same mental model on mobile through a stacked, scroll-aware layout.
+
+### No Authentication in MVP
+
+Authentication, saved meals, and user profiles were intentionally deferred. The first problem to solve was **accurate meal nutrition calculation in one session** — search, quantity, add, summary — without account friction.
+
+Session persistence via `sessionStorage` lets users refresh the page without losing their meal, which covers the most common MVP use case. Auth and saved meals remain on the post-MVP roadmap once the core loop is proven.
 
 ---
 
@@ -71,6 +80,55 @@ MacroMate is a **client-heavy, server-proxied** Next.js application. The browser
 8. Ingredients are saved to `sessionStorage`.
 
 See [`docs/technical_architecture.md`](docs/technical_architecture.md) for the full technical write-up.
+
+---
+
+## Features
+
+- **USDA food search** — debounced search with loading, empty, and error states
+- **Search normalization** — search normalization framework for improving food discoverability and USDA search compatibility
+- **Quantity input** — grams, milliliters, or servings (when USDA serving data exists)
+- **Meal builder** — add, edit, and remove multiple ingredients
+- **Nutrition summary** — calories, protein, carbs, fat, and fiber totals
+- **Session persistence** — meal survives page refresh via `sessionStorage`
+- **Keyboard search** — arrow keys, Enter, and Escape for mouse-free selection
+- **Mobile-friendly layout** — responsive meal builder with accessible tap targets
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Data source | USDA FoodData Central API v1 |
+| State | React Context + custom hooks |
+| Persistence | `sessionStorage` (meal only) |
+| Tests | Vitest + Testing Library |
+
+---
+
+## Screenshots
+
+![MacroMate Architecture](docs/screenshots/architecture-diagram.png)
+
+_Add portfolio screenshots to [`docs/screenshots/`](docs/screenshots/) after deployment:_
+
+| File | Description |
+|------|-------------|
+| `meal-builder-empty.png` | Empty meal builder with search |
+| `meal-builder-search.png` | Search results with alias notice |
+| `meal-builder-ingredients.png` | Meal with multiple ingredients |
+| `meal-builder-mobile.png` | Mobile layout |
+| `nutrition-summary.png` | Nutrition totals panel |
+
+Example markdown once images are added:
+
+```markdown
+![Meal Builder](docs/screenshots/meal-builder-ingredients.png)
+```
 
 ---
 
@@ -141,26 +199,6 @@ docs/                 Planning and architecture docs
 ```
 
 Phase deliverables and code-path mapping: [`phases/README.md`](phases/README.md)
-
----
-
-## Screenshots
-
-Add portfolio screenshots to [`docs/screenshots/`](docs/screenshots/) after deployment:
-
-| File | Description |
-|------|-------------|
-| `meal-builder-empty.png` | Empty meal builder with search |
-| `meal-builder-search.png` | Search results with alias notice |
-| `meal-builder-ingredients.png` | Meal with multiple ingredients |
-| `meal-builder-mobile.png` | Mobile layout |
-| `nutrition-summary.png` | Nutrition totals panel |
-
-Example markdown once images are added:
-
-```markdown
-![Meal Builder](docs/screenshots/meal-builder-ingredients.png)
-```
 
 ---
 
