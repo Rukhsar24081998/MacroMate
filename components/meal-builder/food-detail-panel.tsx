@@ -5,8 +5,10 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScaleIcon } from "@/components/ui/icons";
+import { useFoodDetailReveal } from "@/lib/hooks/use-food-detail-reveal";
 import { scaleNutrition } from "@/lib/nutrition/calculate";
 import { MACRO_KEYS, UNIT_SHORT_LABELS } from "@/lib/nutrition/constants";
+import { cn } from "@/lib/utils/cn";
 import type { NormalizedFoodSummary } from "@/types/food";
 import type { NormalizedNutrition } from "@/types/nutrition";
 import { FoodInfoHeader } from "./food-info-header";
@@ -55,86 +57,125 @@ export function FoodDetailPanel({
     setQuantityValue(value);
   }, []);
 
-  if (!food && !isLoadingDetail && !error) return null;
+  const focusQuantityInput = useCallback(() => {
+    const input = document.getElementById("food-quantity") as HTMLInputElement | null;
+    input?.focus({ preventScroll: true });
+    input?.select();
+  }, []);
 
-  if (isLoadingDetail && !nutrition) {
-    return <FoodDetailSkeleton food={food} />;
-  }
+  const isReadyToFocus = Boolean(food && nutrition && !isLoadingDetail && !error);
+
+  const { panelRef, highlighted } = useFoodDetailReveal({
+    fdcId: food?.fdcId,
+    isReadyToFocus,
+    onFocusQuantity: focusQuantityInput,
+  });
+
+  if (!food && !isLoadingDetail && !error) return null;
 
   const scaledNutrition =
     nutrition && quantityValue?.isValid
       ? scaleNutrition(nutrition, quantityValue.effectiveGrams)
       : null;
 
+  const showSkeleton = isLoadingDetail && !nutrition;
+
   return (
-    <Card className="overflow-hidden border-brand-200 p-0">
-      <div className="border-t-4 border-brand-700 px-5 pt-5">
-        <div className="flex items-center gap-2">
-          <ScaleIcon className="h-5 w-5 text-brand-700" />
-          <h2 className="text-lg font-bold text-gray-900">Configure Addition</h2>
-        </div>
-        <p className="mt-1 text-sm text-gray-500">Set quantity and add to your meal</p>
-      </div>
-
-      <div className="px-5 pb-5">
-        {food ? <FoodInfoHeader food={food} className="mt-4" /> : null}
-
-        {error && food ? (
-          <Alert
-            variant="error"
-            title="Could not load details"
-            action={
-              <Button variant="secondary" onClick={onRetry}>
-                Retry
-              </Button>
-            }
-            className="mt-4"
-          >
-            {error}
-          </Alert>
-        ) : null}
-
-        {nutrition && food ? (
-          <>
-            <div className="mt-4 hidden rounded-xl bg-surface-muted p-4 sm:block">
-              <p className="mb-2 text-sm font-semibold text-gray-900">Nutrition per 100g</p>
-              <NutritionGrid nutrition={nutrition} />
+    <div
+      id="food-detail-panel"
+      ref={panelRef}
+      role="region"
+      aria-label="Configure addition"
+      aria-live="polite"
+      className={cn(
+        "rounded-2xl transition-[box-shadow,background-color] duration-500",
+        highlighted &&
+          "bg-brand-50/40 shadow-[0_0_0_2px_rgba(26,107,82,0.35),0_8px_24px_rgba(26,107,82,0.12)]",
+      )}
+    >
+      {showSkeleton ? (
+        <FoodDetailSkeleton food={food} />
+      ) : (
+        <Card className="overflow-hidden border-brand-200 p-0 shadow-none">
+          <div className="border-t-4 border-brand-700 px-5 pt-5">
+            <div className="flex items-center gap-2">
+              <ScaleIcon className="h-5 w-5 text-brand-700" />
+              <h2 className="text-lg font-bold text-gray-900">Configure Addition</h2>
             </div>
+            <p className="mt-1 text-sm text-gray-500">Set quantity and add to your meal</p>
+          </div>
 
-            <div className="mt-5 rounded-2xl bg-surface-muted p-4">
-              <QuantityInput food={food} onChange={handleQuantityChange} disabled={isLoadingDetail} />
-            </div>
+          <div className="px-5 pb-5">
+            {food ? <FoodInfoHeader food={food} className="mt-4" /> : null}
 
-            {scaledNutrition && quantityValue ? (
-              <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
-                <p className="mb-2 text-sm font-semibold text-gray-900">
-                  Nutrition for {formatQuantityLabel(quantityValue)}
-                  <span className="font-normal text-gray-600">
-                    {" "}
-                    ({Math.round(quantityValue.effectiveGrams)}g)
-                  </span>
-                </p>
-                <NutritionGrid nutrition={scaledNutrition} />
-              </div>
+            {error && food ? (
+              <Alert
+                variant="error"
+                title="Could not load details"
+                action={
+                  <Button variant="secondary" onClick={onRetry}>
+                    Retry
+                  </Button>
+                }
+                className="mt-4"
+              >
+                {error}
+              </Alert>
             ) : null}
 
-            <AddToMealButton
-              food={food}
-              nutrition={nutrition}
-              quantityValue={quantityValue}
-              disabled={isLoadingDetail}
-            />
-          </>
-        ) : null}
+            {nutrition && food ? (
+              <>
+                <div className="mt-4 hidden rounded-xl bg-surface-muted p-4 sm:block">
+                  <p className="mb-2 text-sm font-semibold text-gray-900">Nutrition per 100g</p>
+                  <NutritionGrid nutrition={nutrition} />
+                </div>
 
-        {food ? (
-          <div className="mt-3">
-            <Button variant="ghost" onClick={onClear} className="px-0 text-gray-500">
-              Clear selection
-            </Button>
+                <div className="mt-5 rounded-2xl bg-surface-muted p-4">
+                  <QuantityInput
+                    food={food}
+                    onChange={handleQuantityChange}
+                    disabled={isLoadingDetail}
+                  />
+                </div>
+
+                {scaledNutrition && quantityValue ? (
+                  <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
+                    <p className="mb-2 text-sm font-semibold text-gray-900">
+                      Nutrition for {formatQuantityLabel(quantityValue)}
+                      <span className="font-normal text-gray-600">
+                        {" "}
+                        ({Math.round(quantityValue.effectiveGrams)}g)
+                      </span>
+                    </p>
+                    <NutritionGrid nutrition={scaledNutrition} />
+                  </div>
+                ) : null}
+
+                <AddToMealButton
+                  food={food}
+                  nutrition={nutrition}
+                  quantityValue={quantityValue}
+                  disabled={isLoadingDetail}
+                />
+              </>
+            ) : null}
+
+            {food ? (
+              <div className="mt-3">
+                <Button variant="ghost" onClick={onClear} className="px-0 text-gray-500">
+                  Clear selection
+                </Button>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
-    </Card>
+        </Card>
+      )}
+
+      {food && highlighted ? (
+        <span className="sr-only">
+          Selected {food.description}. Enter a quantity below.
+        </span>
+      ) : null}
+    </div>
   );
 }

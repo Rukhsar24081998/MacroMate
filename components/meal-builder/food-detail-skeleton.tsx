@@ -9,7 +9,7 @@ interface FoodDetailSkeletonProps {
 
 export function FoodDetailSkeleton({ food }: FoodDetailSkeletonProps) {
   return (
-    <Card className="mt-4" aria-busy="true" aria-label="Loading food details">
+    <Card className="overflow-hidden p-0 shadow-none" aria-busy="true" aria-label="Loading food details">
       {food ? <FoodInfoHeader food={food} /> : null}
 
       <div className={`space-y-4 ${food ? "mt-4" : ""}`} aria-hidden="true">

@@ -26,3 +26,13 @@ body {
   background-color: var(--color-surface);
   color: #111827;
 }
+
+#food-detail-panel {
+  scroll-margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  #food-detail-panel {
+    scroll-margin-top: 1.5rem;
+  }
+}
