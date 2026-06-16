@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils/cn";
 import type { NormalizedFoodSummary } from "@/types/food";
 import type { NormalizedNutrition } from "@/types/nutrition";
 import { AddToMealButton } from "./add-to-meal-button";
+import { FoodDetailContext } from "./food-detail-context";
 import { FoodDetailSkeleton } from "./food-detail-skeleton";
 import { NutritionPreviewGrid } from "./nutrition-preview-grid";
 import { QuantityInput, type QuantityValue } from "./quantity-input";
@@ -141,6 +142,8 @@ export function FoodDetailPanel({
                 quantityValue={quantityValue}
                 disabled={isLoadingDetail}
               />
+
+              <FoodDetailContext food={food} />
             </>
           ) : null}
         </div>

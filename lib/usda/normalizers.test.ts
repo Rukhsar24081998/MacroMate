@@ -101,4 +101,22 @@ describe("normalizeSearchResponse", () => {
     expect(result.foods[0]?.previewNutrition?.calories).toBe(55);
     expect(result.foods[0]?.previewNutrition?.protein).toBe(10.7);
   });
+
+  it("includes foodCategory from USDA search metadata", () => {
+    const result = normalizeSearchResponse(
+      {
+        foods: [
+          {
+            fdcId: 168917,
+            description: "Quinoa, cooked",
+            dataType: "SR Legacy",
+            foodCategory: "Cereal Grains and Pasta",
+          },
+        ],
+      },
+      10,
+    );
+
+    expect(result.foods[0]?.foodCategory).toBe("Cereal Grains and Pasta");
+  });
 });

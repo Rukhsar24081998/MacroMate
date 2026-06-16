@@ -25,6 +25,7 @@ interface UsdaSearchFood {
   servingSize?: number;
   servingSizeUnit?: string;
   householdServingFullText?: string;
+  foodCategory?: string | { description?: string };
   foodNutrients?: UsdaNutrientEntry[];
   foodPortions?: UsdaFoodPortion[];
 }
@@ -45,6 +46,7 @@ interface UsdaFoodDetail {
   servingSize?: number;
   servingSizeUnit?: string;
   householdServingFullText?: string;
+  foodCategory?: string | { description?: string };
   foodNutrients?: UsdaNutrientEntry[];
   foodPortions?: UsdaFoodPortion[];
 }
@@ -103,6 +105,15 @@ function nullIfEmpty(value: string | undefined | null): string | null {
   return value.trim();
 }
 
+function extractFoodCategory(raw: UsdaSearchFood | UsdaFoodDetail): string | null {
+  const category = raw.foodCategory;
+  if (typeof category === "string") return nullIfEmpty(category);
+  if (category != null && typeof category === "object") {
+    return nullIfEmpty(category.description ?? null);
+  }
+  return null;
+}
+
 export function normalizeFoodSummary(raw: UsdaSearchFood | UsdaFoodDetail): NormalizedFoodSummary {
   const serving = resolveServingFields(raw);
 
@@ -114,6 +125,7 @@ export function normalizeFoodSummary(raw: UsdaSearchFood | UsdaFoodDetail): Norm
     servingSize: serving.servingSize,
     servingSizeUnit: serving.servingSizeUnit,
     householdServingFullText: serving.householdServingFullText,
+    foodCategory: extractFoodCategory(raw),
   };
 }
 
