@@ -54,6 +54,25 @@ async function usdaFetch(path: string, params: Record<string, string>): Promise<
   return response;
 }
 
+/**
+ * Foundation foods (e.g. Grade A eggs) often 404 on GET /food/{fdcId} but appear in
+ * /foods/search with full abridged nutrient data when queried by fdcId.
+ */
+async function fetchFoodByIdViaSearch(fdcId: number): Promise<Record<string, unknown> | null> {
+  const response = await usdaFetch("/foods/search", {
+    query: String(fdcId),
+    pageSize: "10",
+    pageNumber: "1",
+    dataType: DEFAULT_DATA_TYPES.join(","),
+  });
+
+  if (!response.ok) return null;
+
+  const raw = (await response.json()) as { foods?: Array<Record<string, unknown>> };
+  const match = raw.foods?.find((food) => Number(food.fdcId) === fdcId);
+  return match ?? null;
+}
+
 function mapUsdaStatus(status: number): UsdaApiError {
   switch (status) {
     case 403:
@@ -109,9 +128,17 @@ export async function getFoodById(fdcId: number): Promise<FoodDetailResponse> {
 
   const response = await usdaFetch(`/food/${fdcId}`, {});
 
-  if (!response.ok) throw mapUsdaStatus(response.status);
+  let raw: Record<string, unknown>;
+  if (response.ok) {
+    raw = await response.json();
+  } else if (response.status === 404) {
+    const searchFood = await fetchFoodByIdViaSearch(fdcId);
+    if (!searchFood) throw new UsdaApiError("Food not found", 404, "NOT_FOUND");
+    raw = searchFood;
+  } else {
+    throw mapUsdaStatus(response.status);
+  }
 
-  const raw = await response.json();
   const result = normalizeFoodDetail(raw);
   setCached(key, result);
   return result;

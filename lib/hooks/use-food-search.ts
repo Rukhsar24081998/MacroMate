@@ -74,56 +74,80 @@ export function useFoodSearch(): FoodSearchState {
     void runSearch(debouncedQuery);
   }, [debouncedQuery, runSearch]);
 
-  const fetchDetail = useCallback(async (fdcId: number) => {
-    const cached = detailCache.current.get(fdcId);
-    if (cached) {
-      setSelectedFood(cached.food);
-      setSelectedNutrition(cached.nutrition);
-      setDetailError(null);
-      return;
-    }
+  const applyPreviewFallback = useCallback(
+    (fdcId: number, food: NormalizedFoodSummary | null) => {
+      const previewNutrition = food?.previewNutrition;
+      if (!previewNutrition || !food) return false;
 
-    setIsLoadingDetail(true);
-    setDetailError(null);
-    selectedFdcIdRef.current = fdcId;
-
-    try {
-      const response = await fetch(`/api/foods/${fdcId}`);
-      if (!response.ok) throw new Error(await parseApiError(response));
-
-      const data: FoodDetailResponse = await response.json();
-      detailCache.current.set(fdcId, data);
+      const fallback: FoodDetailResponse = { food, nutrition: previewNutrition };
+      detailCache.current.set(fdcId, fallback);
 
       if (selectedFdcIdRef.current === fdcId) {
-        setSelectedFood(data.food);
-        setSelectedNutrition(data.nutrition);
+        setSelectedFood(food);
+        setSelectedNutrition(previewNutrition);
+        setDetailError(null);
       }
-    } catch (err) {
-      if (selectedFdcIdRef.current === fdcId) {
-        setSelectedNutrition(null);
-        if (err instanceof TypeError) {
-          setDetailError("Check your internet connection and try again.");
-        } else {
-          setDetailError(
-            err instanceof Error ? err.message : "Failed to load food details.",
-          );
+      return true;
+    },
+    [],
+  );
+
+  const fetchDetail = useCallback(
+    async (fdcId: number, foodPreview: NormalizedFoodSummary | null) => {
+      const cached = detailCache.current.get(fdcId);
+      if (cached) {
+        setSelectedFood(cached.food);
+        setSelectedNutrition(cached.nutrition);
+        setDetailError(null);
+        return;
+      }
+
+      setIsLoadingDetail(true);
+      setDetailError(null);
+      selectedFdcIdRef.current = fdcId;
+
+      try {
+        const response = await fetch(`/api/foods/${fdcId}`);
+        if (!response.ok) throw new Error(await parseApiError(response));
+
+        const data: FoodDetailResponse = await response.json();
+        detailCache.current.set(fdcId, data);
+
+        if (selectedFdcIdRef.current === fdcId) {
+          setSelectedFood(data.food);
+          setSelectedNutrition(data.nutrition);
+        }
+      } catch (err) {
+        if (selectedFdcIdRef.current === fdcId) {
+          const recovered = applyPreviewFallback(fdcId, foodPreview);
+          if (!recovered) {
+            setSelectedNutrition(null);
+            if (err instanceof TypeError) {
+              setDetailError("Check your internet connection and try again.");
+            } else {
+              setDetailError(
+                err instanceof Error ? err.message : "Failed to load food details.",
+              );
+            }
+          }
+        }
+      } finally {
+        if (selectedFdcIdRef.current === fdcId) {
+          setIsLoadingDetail(false);
         }
       }
-    } finally {
-      if (selectedFdcIdRef.current === fdcId) {
-        setIsLoadingDetail(false);
-      }
-    }
-  }, []);
+    },
+    [applyPreviewFallback],
+  );
 
   const selectFood = useCallback(
     async (fdcId: number) => {
       selectedFdcIdRef.current = fdcId;
       const preview = results.find((f) => f.fdcId === fdcId) ?? null;
       setSelectedFood(preview);
-      setSelectedNutrition(null);
+      setSelectedNutrition(preview?.previewNutrition ?? null);
       setDetailError(null);
-      await fetchDetail(fdcId);
+      await fetchDetail(fdcId, preview);
     },
     [results, fetchDetail],
   );
@@ -141,9 +165,11 @@ export function useFoodSearch(): FoodSearchState {
 
   const retryDetail = useCallback(() => {
     if (selectedFdcIdRef.current != null) {
-      void fetchDetail(selectedFdcIdRef.current);
+      const fdcId = selectedFdcIdRef.current;
+      const preview = results.find((f) => f.fdcId === fdcId) ?? selectedFood;
+      void fetchDetail(fdcId, preview);
     }
-  }, [fetchDetail]);
+  }, [fetchDetail, results, selectedFood]);
 
   return {
     query,

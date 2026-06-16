@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractNutrition } from "./normalizers";
+import { extractNutrition, normalizeSearchResponse } from "./normalizers";
 
 function nutrient(id: number, amount: number) {
   return { nutrient: { id }, amount };
@@ -41,10 +41,41 @@ describe("extractNutrition", () => {
     expect(nutrition.calories).toBe(100);
   });
 
-  it("converts kJ (1062) when no kcal fields are present", () => {
+  it("reads search-format nutrients (nutrientId + value)", () => {
     const nutrition = extractNutrition({
-      foodNutrients: [nutrient(1062, 418.4)],
+      foodNutrients: [
+        { nutrientId: 1008, value: 148 },
+        { nutrientId: 1003, value: 12.4 },
+        { nutrientId: 1005, value: 0.96 },
+        { nutrientId: 1004, value: 9.96 },
+        { nutrientId: 1079, value: 0 },
+      ],
     });
-    expect(nutrition.calories).toBeCloseTo(100);
+    expect(nutrition.calories).toBe(148);
+    expect(nutrition.protein).toBe(12.4);
+  });
+});
+
+describe("normalizeSearchResponse", () => {
+  it("includes previewNutrition from search foodNutrients", () => {
+    const result = normalizeSearchResponse(
+      {
+        foods: [
+          {
+            fdcId: 747997,
+            description: "Eggs, Grade A, Large, egg white",
+            dataType: "Foundation",
+            foodNutrients: [
+              { nutrientId: 1008, value: 55 },
+              { nutrientId: 1003, value: 10.7 },
+            ],
+          },
+        ],
+      },
+      10,
+    );
+
+    expect(result.foods[0]?.previewNutrition?.calories).toBe(55);
+    expect(result.foods[0]?.previewNutrition?.protein).toBe(10.7);
   });
 });

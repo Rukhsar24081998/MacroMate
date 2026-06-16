@@ -5,6 +5,9 @@ import { NUTRIENT_IDS } from "./constants";
 interface UsdaNutrientEntry {
   nutrient?: { id?: number; unitName?: string };
   amount?: number;
+  /** Present in /foods/search abridged nutrient entries */
+  nutrientId?: number;
+  value?: number;
 }
 
 interface UsdaSearchFood {
@@ -14,6 +17,7 @@ interface UsdaSearchFood {
   brandOwner?: string;
   servingSize?: number;
   servingSizeUnit?: string;
+  foodNutrients?: UsdaNutrientEntry[];
 }
 
 interface UsdaSearchResponse {
@@ -57,13 +61,22 @@ function findNutrientAmount(
   nutrients: UsdaNutrientEntry[],
   id: number,
 ): number | null {
-  const entry = nutrients.find((n) => n.nutrient?.id === id);
-  if (entry?.amount == null || Number.isNaN(entry.amount)) return null;
-  return entry.amount;
+  const entry = nutrients.find(
+    (n) => n.nutrient?.id === id || n.nutrientId === id,
+  );
+  const amount = entry?.amount ?? entry?.value;
+  if (amount == null || Number.isNaN(amount)) return null;
+  return amount;
 }
 
-export function extractNutrition(raw: UsdaFoodDetail): NormalizedNutrition {
-  const nutrients = raw.foodNutrients ?? [];
+export function extractNutrition(
+  raw: Pick<UsdaFoodDetail, "foodNutrients"> | Record<string, unknown>,
+): NormalizedNutrition {
+  const nutrients =
+    (raw as UsdaFoodDetail).foodNutrients ??
+    (Array.isArray((raw as Record<string, unknown>).foodNutrients)
+      ? ((raw as Record<string, unknown>).foodNutrients as UsdaNutrientEntry[])
+      : []);
 
   let calories = findNutrientAmount(nutrients, NUTRIENT_IDS.ENERGY_KCAL);
   if (calories == null) {
@@ -86,10 +99,20 @@ export function extractNutrition(raw: UsdaFoodDetail): NormalizedNutrition {
   };
 }
 
+function normalizeSearchFoodItem(raw: UsdaSearchFood) {
+  const summary = normalizeFoodSummary(raw);
+  if (!raw.foodNutrients?.length) return summary;
+
+  return {
+    ...summary,
+    previewNutrition: extractNutrition({ foodNutrients: raw.foodNutrients }),
+  };
+}
+
 export function normalizeSearchResponse(raw: UsdaSearchResponse, pageSize: number) {
   const foods = (raw.foods ?? [])
     .filter((f) => f.fdcId != null)
-    .map(normalizeFoodSummary);
+    .map(normalizeSearchFoodItem);
 
   return {
     foods,
@@ -101,7 +124,7 @@ export function normalizeSearchResponse(raw: UsdaSearchResponse, pageSize: numbe
   };
 }
 
-export function normalizeFoodDetail(raw: UsdaFoodDetail) {
+export function normalizeFoodDetail(raw: UsdaFoodDetail | Record<string, unknown>) {
   return {
     food: normalizeFoodSummary(raw),
     nutrition: extractNutrition(raw),
