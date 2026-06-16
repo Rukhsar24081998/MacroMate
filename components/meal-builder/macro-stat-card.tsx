@@ -27,16 +27,16 @@ export function MacroStatCard({
   return (
     <div
       className={cn(
-        "rounded-lg px-3 py-2",
-        emphasized ? "bg-gray-900 text-white" : "bg-gray-50",
+        "rounded-xl px-3 py-2",
+        emphasized ? "bg-brand-800 text-white" : "bg-white",
         className,
       )}
       title={isMissing ? MISSING_NUTRIENT_TITLE : undefined}
     >
       <p
         className={cn(
-          "text-xs",
-          emphasized ? "text-gray-300" : "text-gray-500",
+          "text-xs font-medium uppercase tracking-wide",
+          emphasized ? "text-brand-100" : "text-gray-500",
         )}
       >
         {displayLabel}

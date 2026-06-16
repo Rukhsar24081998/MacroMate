@@ -20,7 +20,7 @@ export function UnitSelector({
   disabled,
 }: UnitSelectorProps) {
   return (
-    <div role="group" aria-label="Unit" className="flex gap-1">
+    <div role="group" aria-label="Unit" className="flex gap-2">
       {UNITS.map((option) => {
         const isServing = option === "serving";
         const isDisabled = disabled || (isServing && !servingAvailable);
@@ -39,10 +39,10 @@ export function UnitSelector({
                 : undefined
             }
             className={cn(
-              "flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+              "flex-1 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors",
               isSelected
-                ? "border-gray-900 bg-gray-900 text-white"
-                : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
+                ? "border-brand-800 bg-brand-800 text-white"
+                : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
               isDisabled && "cursor-not-allowed opacity-50",
             )}
           >

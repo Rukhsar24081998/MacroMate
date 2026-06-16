@@ -14,7 +14,7 @@ interface AlertProps {
 const variantClasses: Record<AlertVariant, string> = {
   error: "border-red-200 bg-red-50 text-red-800",
   info: "border-blue-200 bg-blue-50 text-blue-800",
-  empty: "border-gray-200 bg-gray-50 text-gray-600",
+  empty: "border-gray-200 bg-surface-muted text-gray-600",
 };
 
 export function Alert({
@@ -28,7 +28,7 @@ export function Alert({
     <div
       role={variant === "error" ? "alert" : "status"}
       className={cn(
-        "rounded-lg border px-4 py-3 text-sm",
+        "rounded-xl border px-4 py-3 text-sm",
         variantClasses[variant],
         className,
       )}

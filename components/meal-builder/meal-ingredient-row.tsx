@@ -2,17 +2,44 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CloseIcon } from "@/components/ui/icons";
+import { calculateIngredientNutrition } from "@/lib/nutrition/calculate";
 import { MAX_GRAMS_OR_ML, MAX_SERVINGS } from "@/lib/nutrition/constants";
+import { formatNutrientWithUnit } from "@/lib/nutrition/format";
 import { useMeal } from "@/lib/hooks/use-meal";
 import { parseQuantityInput, validateQuantity } from "@/lib/nutrition/validate";
 import type { Ingredient, Unit } from "@/types/ingredient";
-import { IngredientInfo } from "./ingredient-info";
-import { IngredientMacros } from "./ingredient-macros";
+import { FoodAvatar } from "./food-avatar";
+import { formatIngredientQuantity } from "./ingredient-info";
 import { NumericInput } from "./numeric-input";
 import { UnitSelector } from "./unit-selector";
 
 interface MealIngredientRowProps {
   ingredient: Ingredient;
+}
+
+function MacroPill({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "protein" | "carbs" | "fat";
+}) {
+  const toneClass =
+    tone === "protein"
+      ? "bg-blue-50 text-macro-protein"
+      : tone === "carbs"
+        ? "bg-teal-50 text-macro-carbs"
+        : "bg-rose-50 text-macro-fat";
+
+  return (
+    <div className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold ${toneClass}`}>
+      <span className="block text-[10px] font-medium uppercase opacity-70">{label}</span>
+      {value}
+    </div>
+  );
 }
 
 export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
@@ -33,6 +60,7 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
     ingredient.servingSizeGrams,
   );
   const servingAvailable = ingredient.servingSizeGrams != null;
+  const nutrition = calculateIngredientNutrition(ingredient);
 
   const commitChanges = useCallback(() => {
     if (validationError != null) return;
@@ -57,37 +85,73 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
   const inputId = `ingredient-quantity-${ingredient.id}`;
 
   return (
-    <li className="rounded-lg border border-gray-200 p-3 sm:p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <IngredientInfo ingredient={ingredient} />
-        <div className="flex shrink-0 gap-2 self-end sm:self-start">
+    <li className="rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <FoodAvatar name={ingredient.name} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate font-semibold text-gray-900">{ingredient.name}</p>
+              <p className="mt-0.5 text-sm text-gray-500">
+                {formatIngredientQuantity(ingredient)}
+                {nutrition.calories != null
+                  ? ` • ${formatNutrientWithUnit("calories", nutrition.calories)}`
+                  : ""}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              {nutrition.calories != null ? (
+                <p className="hidden text-sm font-bold text-brand-800 sm:block">
+                  {formatNutrientWithUnit("calories", nutrition.calories)}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => removeIngredient(ingredient.id)}
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                aria-label={`Remove ${ingredient.name}`}
+              >
+                <CloseIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {!isEditing ? (
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <MacroPill
+                label="Protein"
+                value={formatNutrientWithUnit("protein", nutrition.protein)}
+                tone="protein"
+              />
+              <MacroPill
+                label="Carbs"
+                value={formatNutrientWithUnit("carbohydrates", nutrition.carbohydrates)}
+                tone="carbs"
+              />
+              <MacroPill
+                label="Fat"
+                value={formatNutrientWithUnit("fat", nutrition.fat)}
+                tone="fat"
+              />
+            </div>
+          ) : null}
+
           {!isEditing ? (
             <Button
               type="button"
               variant="ghost"
               onClick={() => setIsEditing(true)}
-              className="min-h-11 px-3 text-sm"
+              className="mt-3 h-auto px-0 py-1 text-sm text-brand-700"
               aria-label={`Edit quantity for ${ingredient.name}`}
             >
-              Edit
+              Edit quantity
             </Button>
           ) : null}
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => removeIngredient(ingredient.id)}
-            className="min-h-11 px-3 text-sm text-red-700 hover:bg-red-50 hover:text-red-800"
-            aria-label={`Remove ${ingredient.name}`}
-          >
-            Remove
-          </Button>
         </div>
       </div>
 
-      {!isEditing ? <IngredientMacros ingredient={ingredient} /> : null}
-
       {isEditing ? (
-        <div className="mt-3 space-y-3 border-t border-gray-100 pt-3">
+        <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
           <div>
             <label htmlFor={inputId} className="mb-2 block text-sm font-medium text-gray-700">
               Quantity

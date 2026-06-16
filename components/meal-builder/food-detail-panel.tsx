@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ScaleIcon } from "@/components/ui/icons";
 import { scaleNutrition } from "@/lib/nutrition/calculate";
 import { MACRO_KEYS, UNIT_SHORT_LABELS } from "@/lib/nutrition/constants";
 import type { NormalizedFoodSummary } from "@/types/food";
@@ -66,64 +67,77 @@ export function FoodDetailPanel({
       : null;
 
   return (
-    <Card className="mt-4">
-      {food ? <FoodInfoHeader food={food} /> : null}
-
-      {error && food ? (
-        <Alert
-          variant="error"
-          title="Could not load details"
-          action={
-            <Button variant="secondary" onClick={onRetry}>
-              Retry
-            </Button>
-          }
-          className="mt-4"
-        >
-          {error}
-        </Alert>
-      ) : null}
-
-      {nutrition && food ? (
-        <>
-          <div className="mt-4">
-            <p className="mb-2 text-sm font-medium text-gray-900">Nutrition per 100g</p>
-            <NutritionGrid nutrition={nutrition} />
-          </div>
-
-          <div className="mt-6 border-t border-gray-100 pt-4">
-            <QuantityInput food={food} onChange={handleQuantityChange} disabled={isLoadingDetail} />
-          </div>
-
-          {scaledNutrition && quantityValue ? (
-            <div className="mt-4 rounded-lg bg-gray-50 p-4">
-              <p className="mb-2 text-sm font-medium text-gray-900">
-                Nutrition for {formatQuantityLabel(quantityValue)}
-                <span className="font-normal text-gray-600">
-                  {" "}
-                  ({Math.round(quantityValue.effectiveGrams)}g)
-                </span>
-              </p>
-              <NutritionGrid nutrition={scaledNutrition} />
-            </div>
-          ) : null}
-
-          <AddToMealButton
-            food={food}
-            nutrition={nutrition}
-            quantityValue={quantityValue}
-            disabled={isLoadingDetail}
-          />
-        </>
-      ) : null}
-
-      {food ? (
-        <div className="mt-4">
-          <Button variant="ghost" onClick={onClear}>
-            Clear selection
-          </Button>
+    <Card className="overflow-hidden border-brand-200 p-0">
+      <div className="border-t-4 border-brand-700 px-5 pt-5">
+        <div className="flex items-center gap-2">
+          <ScaleIcon className="h-5 w-5 text-brand-700" />
+          <h2 className="text-lg font-bold text-gray-900">Configure Addition</h2>
         </div>
-      ) : null}
+        <p className="mt-1 text-sm text-gray-500">Set quantity and add to your meal</p>
+      </div>
+
+      <div className="px-5 pb-5">
+        {food ? <FoodInfoHeader food={food} className="mt-4" /> : null}
+
+        {error && food ? (
+          <Alert
+            variant="error"
+            title="Could not load details"
+            action={
+              <Button variant="secondary" onClick={onRetry}>
+                Retry
+              </Button>
+            }
+            className="mt-4"
+          >
+            {error}
+          </Alert>
+        ) : null}
+
+        {nutrition && food ? (
+          <>
+            <div className="mt-4 hidden rounded-xl bg-surface-muted p-4 sm:block">
+              <p className="mb-2 text-sm font-semibold text-gray-900">Nutrition per 100g</p>
+              <NutritionGrid nutrition={nutrition} />
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-surface-muted p-4">
+              <p className="mb-3 text-sm font-semibold text-gray-900 lg:hidden">
+                Set Ingredient Quantity
+              </p>
+              <QuantityInput food={food} onChange={handleQuantityChange} disabled={isLoadingDetail} />
+            </div>
+
+            {scaledNutrition && quantityValue ? (
+              <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
+                <p className="mb-2 text-sm font-semibold text-gray-900">
+                  Nutrition for {formatQuantityLabel(quantityValue)}
+                  <span className="font-normal text-gray-600">
+                    {" "}
+                    ({Math.round(quantityValue.effectiveGrams)}g)
+                  </span>
+                </p>
+                <NutritionGrid nutrition={scaledNutrition} />
+              </div>
+            ) : null}
+
+            <AddToMealButton
+              food={food}
+              nutrition={nutrition}
+              quantityValue={quantityValue}
+              disabled={isLoadingDetail}
+            />
+          </>
+        ) : null}
+
+        {food ? (
+          <div className="mt-3">
+            <Button variant="ghost" onClick={onClear} className="px-0 text-gray-500">
+              Clear selection
+            </Button>
+          </div>
+        ) : null}
+      </div>
     </Card>
   );
 }

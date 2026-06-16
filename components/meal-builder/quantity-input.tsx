@@ -71,10 +71,11 @@ export function QuantityInput({ food, onChange, disabled }: QuantityInputProps) 
 
   return (
     <div className="space-y-3">
-      <div>
-        <label htmlFor="food-quantity" className="mb-2 block text-sm font-medium text-gray-700">
-          Quantity
-        </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="food-quantity" className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Quantity
+          </label>
         <NumericInput
           id="food-quantity"
           value={quantityInput}
@@ -85,10 +86,10 @@ export function QuantityInput({ food, onChange, disabled }: QuantityInputProps) 
           max={numericMax}
           step={numericStep}
         />
-      </div>
+        </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-gray-700">Unit</p>
+        <p className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">Unit</p>
         <UnitSelector
           unit={unit}
           onUnitChange={setUnit}
@@ -105,6 +106,7 @@ export function QuantityInput({ food, onChange, disabled }: QuantityInputProps) 
             Servings unavailable — no USDA serving size for this food.
           </p>
         ) : null}
+      </div>
       </div>
     </div>
   );

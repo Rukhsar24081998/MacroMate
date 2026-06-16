@@ -17,6 +17,8 @@ import { SearchResultsList } from "./search-results-list";
 import { SearchResultsSkeleton } from "./search-results-skeleton";
 import { SearchStatus } from "./search-status";
 
+const MOBILE_FILTER_CHIPS = ["Frequent", "Favorites", "Recent", "USDA"] as const;
+
 export function FoodSearchSection() {
   const search = useFoodSearch();
   const [resultsDismissed, setResultsDismissed] = useState(false);
@@ -70,49 +72,69 @@ export function FoodSearchSection() {
   });
 
   return (
-    <section aria-label="Food search">
-      <SearchInput
-        value={search.query}
-        onChange={search.setQuery}
-        onKeyDown={handleKeyDown}
-        isLoading={search.isSearching}
-        aria-controls="food-search-results"
-        aria-expanded={showResults}
-        aria-activedescendant={
-          showResults && highlightedIndex >= 0
-            ? `search-result-${search.results[highlightedIndex]?.fdcId}`
-            : undefined
-        }
-      />
-
-      <div className="mt-4" aria-live="polite">
-        <SearchStatus
-          queryLength={queryLength}
-          error={search.error}
-          onRetry={search.retrySearch}
-        />
-      </div>
-
-      {showSearchSkeleton ? <SearchResultsSkeleton /> : null}
-
-      {showAliasNotice ? (
-        <SearchAliasNotice
-          normalizedQuery={search.searchNormalization!.normalizedQuery}
-        />
-      ) : null}
-
-      {showEmptyResults ? <SearchEmptyResults /> : null}
-
-      {showResults ? (
-        <Card id="food-search-results" className="mt-4 overflow-hidden p-0">
-          <SearchResultsList
-            foods={search.results}
-            selectedFdcId={search.selectedFood?.fdcId ?? null}
-            highlightedIndex={highlightedIndex}
-            onSelect={(fdcId) => void search.selectFood(fdcId)}
+    <section aria-label="Food search" className="space-y-6">
+      <Card>
+        <h2 className="text-lg font-bold text-gray-900">Find Ingredients</h2>
+        <div className="mt-4">
+          <SearchInput
+            value={search.query}
+            onChange={search.setQuery}
+            onKeyDown={handleKeyDown}
+            isLoading={search.isSearching}
+            aria-controls="food-search-results"
+            aria-expanded={showResults}
+            aria-activedescendant={
+              showResults && highlightedIndex >= 0
+                ? `search-result-${search.results[highlightedIndex]?.fdcId}`
+                : undefined
+            }
           />
-        </Card>
-      ) : null}
+        </div>
+
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+          {MOBILE_FILTER_CHIPS.map((chip, index) => (
+            <span
+              key={chip}
+              className={
+                index === 3
+                  ? "shrink-0 rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-800"
+                  : "shrink-0 rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-gray-500"
+              }
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-3" aria-live="polite">
+          <SearchStatus
+            queryLength={queryLength}
+            error={search.error}
+            onRetry={search.retrySearch}
+          />
+        </div>
+
+        {showSearchSkeleton ? <SearchResultsSkeleton /> : null}
+
+        {showAliasNotice ? (
+          <SearchAliasNotice
+            normalizedQuery={search.searchNormalization!.normalizedQuery}
+          />
+        ) : null}
+
+        {showEmptyResults ? <SearchEmptyResults /> : null}
+
+        {showResults ? (
+          <Card id="food-search-results" className="mt-4 overflow-hidden p-0 shadow-none">
+            <SearchResultsList
+              foods={search.results}
+              selectedFdcId={search.selectedFood?.fdcId ?? null}
+              highlightedIndex={highlightedIndex}
+              onSelect={(fdcId) => void search.selectFood(fdcId)}
+            />
+          </Card>
+        ) : null}
+      </Card>
 
       <FoodDetailPanel
         food={search.selectedFood}

@@ -1,26 +1,44 @@
 import type { NormalizedNutrition } from "@/types/nutrition";
-import { MacroStatCard } from "./macro-stat-card";
+import {
+  CaloriesHeroCard,
+  MacroSummaryCard,
+} from "./macro-summary-card";
 
 interface MealTotalsProps {
   totals: NormalizedNutrition;
+  layout?: "desktop" | "mobile";
 }
 
-const EMPHASIZED_KEYS = ["calories", "protein"] as const;
-const SECONDARY_KEYS = ["carbohydrates", "fat", "fiber"] as const;
+export function MealTotals({ totals, layout = "desktop" }: MealTotalsProps) {
+  if (layout === "mobile") {
+    return (
+      <div className="space-y-3">
+        <CaloriesHeroCard value={totals.calories} />
+        <div className="grid grid-cols-2 gap-3">
+          <MacroSummaryCard macroKey="protein" value={totals.protein} compact />
+          <MacroSummaryCard macroKey="carbohydrates" value={totals.carbohydrates} compact />
+        </div>
+      </div>
+    );
+  }
 
-export function MealTotals({ totals }: MealTotalsProps) {
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        {EMPHASIZED_KEYS.map((key) => (
-          <MacroStatCard key={key} macroKey={key} value={totals[key]} emphasized />
-        ))}
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        {SECONDARY_KEYS.map((key) => (
-          <MacroStatCard key={key} macroKey={key} value={totals[key]} />
-        ))}
-      </div>
+    <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
+      <MacroSummaryCard
+        macroKey="calories"
+        value={totals.calories}
+        subtitle={totals.calories != null ? "kcal total" : undefined}
+        className="col-span-2 xl:col-span-1"
+      />
+      <MacroSummaryCard macroKey="protein" value={totals.protein} />
+      <MacroSummaryCard macroKey="carbohydrates" value={totals.carbohydrates} />
+      <MacroSummaryCard macroKey="fat" value={totals.fat} />
+      <MacroSummaryCard
+        macroKey="fiber"
+        value={totals.fiber}
+        subtitle={totals.fiber != null && totals.fiber >= 6 ? "high fiber" : undefined}
+        className="col-span-2 xl:col-span-1"
+      />
     </div>
   );
 }

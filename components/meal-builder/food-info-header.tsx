@@ -1,7 +1,9 @@
+import { cn } from "@/lib/utils/cn";
 import type { NormalizedFoodSummary } from "@/types/food";
 
 interface FoodInfoHeaderProps {
   food: NormalizedFoodSummary;
+  className?: string;
 }
 
 function dataTypeBadgeClass(dataType: string): string {
@@ -10,9 +12,9 @@ function dataTypeBadgeClass(dataType: string): string {
   return "bg-gray-100 text-gray-700";
 }
 
-export function FoodInfoHeader({ food }: FoodInfoHeaderProps) {
+export function FoodInfoHeader({ food, className }: FoodInfoHeaderProps) {
   return (
-    <div>
+    <div className={cn(className)}>
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-semibold text-gray-900">{food.description}</h3>
         <span
