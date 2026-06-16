@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractNutrition, normalizeSearchResponse } from "./normalizers";
+import { extractNutrition, normalizeSearchResponse, resolveServingFields } from "./normalizers";
 
 function nutrient(id: number, amount: number) {
   return { nutrient: { id }, amount };
@@ -53,6 +53,29 @@ describe("extractNutrition", () => {
     });
     expect(nutrition.calories).toBe(148);
     expect(nutrition.protein).toBe(12.4);
+  });
+});
+
+describe("resolveServingFields", () => {
+  it("uses direct servingSize when provided", () => {
+    const serving = resolveServingFields({
+      servingSize: 284,
+      servingSizeUnit: "g",
+      householdServingFullText: "1 breast",
+    });
+    expect(serving.servingSize).toBe(284);
+    expect(serving.servingSizeUnit).toBe("g");
+  });
+
+  it("falls back to the smallest single-unit foodPortion", () => {
+    const serving = resolveServingFields({
+      foodPortions: [
+        { amount: 1, gramWeight: 243 },
+        { amount: 1, gramWeight: 33 },
+      ],
+    });
+    expect(serving.servingSize).toBe(33);
+    expect(serving.servingSizeUnit).toBe("g");
   });
 });
 

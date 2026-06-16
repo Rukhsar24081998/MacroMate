@@ -10,14 +10,23 @@ interface UsdaNutrientEntry {
   value?: number;
 }
 
+interface UsdaFoodPortion {
+  gramWeight?: number;
+  amount?: number;
+  portionDescription?: string;
+}
+
 interface UsdaSearchFood {
   fdcId?: number;
   description?: string;
   dataType?: string;
   brandOwner?: string;
+  ndbNumber?: number;
   servingSize?: number;
   servingSizeUnit?: string;
+  householdServingFullText?: string;
   foodNutrients?: UsdaNutrientEntry[];
+  foodPortions?: UsdaFoodPortion[];
 }
 
 interface UsdaSearchResponse {
@@ -32,10 +41,61 @@ interface UsdaFoodDetail {
   description?: string;
   dataType?: string;
   brandOwner?: string;
+  ndbNumber?: number;
   servingSize?: number;
   servingSizeUnit?: string;
   householdServingFullText?: string;
   foodNutrients?: UsdaNutrientEntry[];
+  foodPortions?: UsdaFoodPortion[];
+}
+
+type UsdaServingSource = Pick<
+  UsdaFoodDetail,
+  "servingSize" | "servingSizeUnit" | "householdServingFullText" | "foodPortions"
+>;
+
+export function resolveServingFields(raw: UsdaServingSource): {
+  servingSize: number | null;
+  servingSizeUnit: string | null;
+  householdServingFullText: string | null;
+} {
+  if (raw.servingSize != null && raw.servingSize > 0) {
+    return {
+      servingSize: raw.servingSize,
+      servingSizeUnit: nullIfEmpty(raw.servingSizeUnit ?? null) ?? "g",
+      householdServingFullText: nullIfEmpty(raw.householdServingFullText ?? null),
+    };
+  }
+
+  const portions = raw.foodPortions ?? [];
+  const oneUnitPortions = portions.filter(
+    (portion) =>
+      portion.gramWeight != null &&
+      portion.gramWeight > 0 &&
+      (portion.amount === 1 || portion.amount == null),
+  );
+  const primary =
+    [...oneUnitPortions].sort(
+      (left, right) => (left.gramWeight ?? Infinity) - (right.gramWeight ?? Infinity),
+    )[0] ??
+    portions.find((portion) => portion.gramWeight != null && portion.gramWeight > 0);
+
+  if (primary?.gramWeight != null) {
+    return {
+      servingSize: primary.gramWeight,
+      servingSizeUnit: "g",
+      householdServingFullText:
+        nullIfEmpty(raw.householdServingFullText ?? null) ??
+        nullIfEmpty(primary.portionDescription ?? null) ??
+        (primary.amount === 1 ? "1 serving" : null),
+    };
+  }
+
+  return {
+    servingSize: null,
+    servingSizeUnit: null,
+    householdServingFullText: nullIfEmpty(raw.householdServingFullText ?? null),
+  };
 }
 
 function nullIfEmpty(value: string | undefined | null): string | null {
@@ -44,16 +104,16 @@ function nullIfEmpty(value: string | undefined | null): string | null {
 }
 
 export function normalizeFoodSummary(raw: UsdaSearchFood | UsdaFoodDetail): NormalizedFoodSummary {
+  const serving = resolveServingFields(raw);
+
   return {
     fdcId: raw.fdcId ?? 0,
     description: raw.description?.trim() ?? "Unknown food",
     dataType: raw.dataType ?? "Unknown",
     brandOwner: nullIfEmpty(raw.brandOwner ?? null),
-    servingSize: raw.servingSize ?? null,
-    servingSizeUnit: nullIfEmpty(raw.servingSizeUnit ?? null),
-    householdServingFullText: nullIfEmpty(
-      "householdServingFullText" in raw ? raw.householdServingFullText : null,
-    ),
+    servingSize: serving.servingSize,
+    servingSizeUnit: serving.servingSizeUnit,
+    householdServingFullText: serving.householdServingFullText,
   };
 }
 

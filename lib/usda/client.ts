@@ -6,7 +6,7 @@ import {
   USDA_API_BASE_URL,
   USDA_REQUEST_TIMEOUT_MS,
 } from "./constants";
-import { normalizeFoodDetail, normalizeSearchResponse } from "./normalizers";
+import { normalizeFoodDetail, normalizeSearchResponse, resolveServingFields } from "./normalizers";
 
 export class UsdaApiError extends Error {
   constructor(
@@ -71,6 +71,64 @@ async function fetchFoodByIdViaSearch(fdcId: number): Promise<Record<string, unk
   const raw = (await response.json()) as { foods?: Array<Record<string, unknown>> };
   const match = raw.foods?.find((food) => Number(food.fdcId) === fdcId);
   return match ?? null;
+}
+
+function applyServingFields(
+  raw: Record<string, unknown>,
+  serving: ReturnType<typeof resolveServingFields>,
+): Record<string, unknown> {
+  return {
+    ...raw,
+    servingSize: serving.servingSize,
+    servingSizeUnit: serving.servingSizeUnit,
+    householdServingFullText: serving.householdServingFullText,
+  };
+}
+
+function hasServingData(raw: Record<string, unknown>): boolean {
+  return resolveServingFields(raw as Parameters<typeof resolveServingFields>[0]).servingSize != null;
+}
+
+/** SR Legacy records often share an NDB number with Foundation foods and include foodPortions. */
+async function fetchSrLegacyFoodByNdb(ndbNumber: number): Promise<Record<string, unknown> | null> {
+  const searchResponse = await usdaFetch("/foods/search", {
+    query: String(ndbNumber),
+    pageSize: "10",
+    pageNumber: "1",
+    dataType: "SR Legacy",
+  });
+
+  if (!searchResponse.ok) return null;
+
+  const searchRaw = (await searchResponse.json()) as {
+    foods?: Array<{ fdcId?: number; ndbNumber?: number }>;
+  };
+  const match = searchRaw.foods?.find((food) => Number(food.ndbNumber) === ndbNumber);
+  if (match?.fdcId == null) return null;
+
+  const detailResponse = await usdaFetch(`/food/${match.fdcId}`, {});
+  if (!detailResponse.ok) return null;
+
+  return detailResponse.json();
+}
+
+async function enrichServingData(raw: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const directServing = resolveServingFields(raw as Parameters<typeof resolveServingFields>[0]);
+  if (directServing.servingSize != null) {
+    return applyServingFields(raw, directServing);
+  }
+
+  const dataType = String(raw.dataType ?? "");
+  const ndbNumber = Number(raw.ndbNumber);
+  if (dataType === "Foundation" && Number.isFinite(ndbNumber) && ndbNumber > 0) {
+    const srLegacy = await fetchSrLegacyFoodByNdb(ndbNumber);
+    if (srLegacy && hasServingData(srLegacy)) {
+      const srServing = resolveServingFields(srLegacy as Parameters<typeof resolveServingFields>[0]);
+      return applyServingFields(raw, srServing);
+    }
+  }
+
+  return applyServingFields(raw, directServing);
 }
 
 function mapUsdaStatus(status: number): UsdaApiError {
@@ -138,6 +196,8 @@ export async function getFoodById(fdcId: number): Promise<FoodDetailResponse> {
   } else {
     throw mapUsdaStatus(response.status);
   }
+
+  raw = await enrichServingData(raw);
 
   const result = normalizeFoodDetail(raw);
   setCached(key, result);

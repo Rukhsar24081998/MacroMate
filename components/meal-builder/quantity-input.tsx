@@ -105,11 +105,6 @@ export function QuantityInput({ food, onChange, disabled, compact }: QuantityInp
           {unit === "ml" ? (
             <p className={noteClass}>MVP note: milliliters are treated as grams (1 ml ≈ 1 g).</p>
           ) : null}
-          {!servingAvailable ? (
-            <p className={noteClass}>
-              Servings unavailable — no USDA serving size for this food.
-            </p>
-          ) : null}
         </div>
       </div>
     </div>
