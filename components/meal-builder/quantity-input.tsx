@@ -20,9 +20,10 @@ interface QuantityInputProps {
   food: NormalizedFoodSummary;
   onChange?: (value: QuantityValue | null) => void;
   disabled?: boolean;
+  compact?: boolean;
 }
 
-export function QuantityInput({ food, onChange, disabled }: QuantityInputProps) {
+export function QuantityInput({ food, onChange, disabled, compact }: QuantityInputProps) {
   const [quantityInput, setQuantityInput] = useState(String(DEFAULT_QUANTITY));
   const [unit, setUnit] = useState<Unit>("g");
 
@@ -69,44 +70,47 @@ export function QuantityInput({ food, onChange, disabled }: QuantityInputProps) 
   const numericMax = unit === "serving" ? MAX_SERVINGS : MAX_GRAMS_OR_ML;
   const numericStep = unit === "serving" ? 0.5 : unit === "ml" ? 10 : 1;
 
+  const labelClass = compact
+    ? "mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500"
+    : "mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500";
+  const noteClass = compact ? "mt-1 text-[11px] text-gray-500" : "mt-2 text-xs text-gray-500";
+
   return (
-    <div className="space-y-3">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <div className={compact ? "space-y-2" : "space-y-3"}>
+      <div className={compact ? "grid gap-2.5 sm:grid-cols-2" : "grid gap-4 sm:grid-cols-2"}>
         <div>
-          <label htmlFor="food-quantity" className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <label htmlFor="food-quantity" className={labelClass}>
             Quantity
           </label>
-        <NumericInput
-          id="food-quantity"
-          value={quantityInput}
-          onChange={setQuantityInput}
-          disabled={disabled}
-          error={validationError}
-          min={0.1}
-          max={numericMax}
-          step={numericStep}
-        />
+          <NumericInput
+            id="food-quantity"
+            value={quantityInput}
+            onChange={setQuantityInput}
+            disabled={disabled}
+            error={validationError}
+            min={0.1}
+            max={numericMax}
+            step={numericStep}
+          />
         </div>
 
-      <div>
-        <p className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">Unit</p>
-        <UnitSelector
-          unit={unit}
-          onUnitChange={setUnit}
-          servingAvailable={servingAvailable}
-          disabled={disabled}
-        />
-        {unit === "ml" ? (
-          <p className="mt-2 text-xs text-gray-500">
-            MVP note: milliliters are treated as grams (1 ml ≈ 1 g).
-          </p>
-        ) : null}
-        {!servingAvailable ? (
-          <p className="mt-2 text-xs text-gray-500">
-            Servings unavailable — no USDA serving size for this food.
-          </p>
-        ) : null}
-      </div>
+        <div>
+          <p className={labelClass}>Unit</p>
+          <UnitSelector
+            unit={unit}
+            onUnitChange={setUnit}
+            servingAvailable={servingAvailable}
+            disabled={disabled}
+          />
+          {unit === "ml" ? (
+            <p className={noteClass}>MVP note: milliliters are treated as grams (1 ml ≈ 1 g).</p>
+          ) : null}
+          {!servingAvailable ? (
+            <p className={noteClass}>
+              Servings unavailable — no USDA serving size for this food.
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   );

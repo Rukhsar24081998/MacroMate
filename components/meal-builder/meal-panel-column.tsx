@@ -15,7 +15,7 @@ export function MealPanelColumn() {
     <section aria-label="Current meal" className="flex h-full min-h-0 flex-col">
       <NutritionSummaryBar />
 
-      <div className="mt-5 flex min-h-0 flex-1 flex-col">
+      <div className="mt-4 flex min-h-0 flex-1 flex-col">
         <ColumnHeader
           title="Ingredients"
           meta={
@@ -29,11 +29,11 @@ export function MealPanelColumn() {
           {ingredients.length === 0 ? (
             <EmptyState
               icon={<UtensilsIcon className="h-5 w-5" />}
-              title="Your meal is empty"
-              description="Search for foods, set a quantity, and tap Add To Meal. Items will appear here."
+              title="Start building your meal by adding ingredients."
+              className="py-8"
             />
           ) : (
-            <ul className="space-y-2 pb-2">
+            <ul className="space-y-1.5 pb-2">
               {ingredients.map((ingredient) => (
                 <MealIngredientRow key={ingredient.id} ingredient={ingredient} />
               ))}
@@ -41,7 +41,7 @@ export function MealPanelColumn() {
           )}
         </div>
 
-        <div className="mt-4 shrink-0 border-t border-gray-100 pt-4">
+        <div className="mt-3 shrink-0 border-t border-gray-100 pt-3">
           <ClearMealButton className="w-full" />
         </div>
       </div>

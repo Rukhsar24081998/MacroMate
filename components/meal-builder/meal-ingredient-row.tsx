@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
 import { calculateIngredientNutrition } from "@/lib/nutrition/calculate";
 import { MAX_GRAMS_OR_ML, MAX_SERVINGS } from "@/lib/nutrition/constants";
-import { formatNutrientWithUnit } from "@/lib/nutrition/format";
 import { useMeal } from "@/lib/hooks/use-meal";
 import { parseQuantityInput, validateQuantity } from "@/lib/nutrition/validate";
 import type { Ingredient, Unit } from "@/types/ingredient";
 import { FoodAvatar } from "./food-avatar";
 import { formatIngredientQuantity } from "./ingredient-info";
+import { MacroPills } from "./macro-pills";
 import { NumericInput } from "./numeric-input";
 import { UnitSelector } from "./unit-selector";
 
@@ -61,39 +61,31 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
   const inputId = `ingredient-quantity-${ingredient.id}`;
 
   return (
-    <li className="group rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-shadow duration-150 hover:border-gray-200 hover:shadow-md">
-      <div className="flex items-start gap-3">
-        <FoodAvatar name={ingredient.name} className="h-10 w-10 shrink-0 text-xs" />
+    <li className="group rounded-lg border border-gray-100 bg-white px-2.5 py-2 shadow-sm transition-all duration-150 hover:border-gray-200 hover:shadow-md">
+      <div className="flex items-start gap-2.5">
+        <FoodAvatar name={ingredient.name} className="h-8 w-8 shrink-0 text-[10px]" />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate text-sm font-semibold leading-snug text-gray-900">
+            <p className="truncate text-[13px] font-semibold leading-snug text-gray-900">
               {ingredient.name}
-            </p>
-            {nutrition.calories != null ? (
-              <span className="shrink-0 text-sm font-bold tabular-nums text-gray-900">
-                {formatNutrientWithUnit("calories", nutrition.calories)}
-              </span>
-            ) : null}
-          </div>
-          <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="text-xs text-gray-500">
-              {formatIngredientQuantity(ingredient)}
-              {nutrition.protein != null ? (
-                <span className="font-medium text-brand-700">
-                  {" · "}
-                  {formatNutrientWithUnit("protein", nutrition.protein)} protein
-                </span>
-              ) : null}
             </p>
             <button
               type="button"
               onClick={() => removeIngredient(ingredient.id)}
-              className="shrink-0 rounded-md p-1.5 text-gray-300 opacity-100 transition-colors hover:bg-red-50 hover:text-red-600 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
+              className="-mr-1 shrink-0 rounded-md p-1 text-gray-300 opacity-100 transition-colors hover:bg-red-50 hover:text-red-600 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
               aria-label={`Remove ${ingredient.name}`}
             >
               <CloseIcon className="h-3.5 w-3.5" />
             </button>
           </div>
+          <p className="mt-0.5 text-[11px] text-gray-500">{formatIngredientQuantity(ingredient)}</p>
+          <MacroPills
+            className="mt-1.5"
+            calories={nutrition.calories}
+            protein={nutrition.protein}
+            carbohydrates={nutrition.carbohydrates}
+            fat={nutrition.fat}
+          />
         </div>
       </div>
 
@@ -101,7 +93,7 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="mt-2 text-xs font-medium text-brand-700 underline-offset-2 hover:underline"
+          className="mt-1.5 text-[11px] font-medium text-brand-700 underline-offset-2 transition-colors hover:text-brand-800 hover:underline"
           aria-label={`Edit quantity for ${ingredient.name}`}
         >
           Edit quantity
@@ -109,9 +101,9 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
       ) : null}
 
       {isEditing ? (
-        <div className="mt-3 space-y-3 border-t border-gray-100 pt-3">
+        <div className="mt-2.5 space-y-2.5 border-t border-gray-100 pt-2.5">
           <div>
-            <label htmlFor={inputId} className="mb-2 block text-xs font-medium text-gray-600">
+            <label htmlFor={inputId} className="mb-1.5 block text-[11px] font-medium text-gray-600">
               Quantity
             </label>
             <NumericInput
@@ -126,7 +118,7 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
           </div>
 
           <div>
-            <p className="mb-2 text-xs font-medium text-gray-600">Unit</p>
+            <p className="mb-1.5 text-[11px] font-medium text-gray-600">Unit</p>
             <UnitSelector
               unit={unit}
               onUnitChange={setUnit}

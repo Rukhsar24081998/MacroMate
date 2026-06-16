@@ -70,21 +70,21 @@ export function FoodDetailPanel({
       aria-label="Selected food details"
       aria-live="polite"
       className={cn(
-        "rounded-2xl transition-[box-shadow,background-color] duration-500",
+        "rounded-xl transition-[box-shadow,background-color] duration-300 ease-out",
         highlighted &&
-          "bg-brand-50/40 shadow-[0_0_0_2px_rgba(26,107,82,0.35),0_8px_24px_rgba(26,107,82,0.12)]",
+          "bg-brand-50/40 shadow-[0_0_0_2px_rgba(26,107,82,0.35),0_6px_20px_rgba(26,107,82,0.1)]",
       )}
     >
       {showSkeleton ? (
         <FoodDetailSkeleton food={food} />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {food ? (
             <div>
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-2">
                 <span
                   className={cn(
-                    "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                    "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
                     dataTypeBadgeClass(food.dataType),
                   )}
                 >
@@ -94,15 +94,15 @@ export function FoodDetailPanel({
                   type="button"
                   variant="ghost"
                   onClick={onClear}
-                  className="h-auto px-2 py-1 text-xs text-gray-400"
+                  className="h-auto px-1.5 py-0.5 text-[11px] text-gray-400 transition-colors hover:text-gray-600"
                 >
                   Clear
                 </Button>
               </div>
-              <h3 className="mt-2 text-lg font-semibold leading-snug tracking-tight text-gray-900">
+              <h3 className="mt-1.5 text-base font-semibold leading-snug tracking-tight text-gray-900">
                 {food.description}
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-0.5 text-xs text-gray-500">
                 {food.brandOwner ?? "USDA FoodData Central · per 100g"}
               </p>
             </div>
@@ -126,11 +126,12 @@ export function FoodDetailPanel({
             <>
               <NutritionPreviewGrid nutrition={nutrition} />
 
-              <div className="rounded-xl bg-surface-muted p-4">
+              <div className="rounded-lg bg-surface-muted/80 p-3 ring-1 ring-gray-100/60">
                 <QuantityInput
                   food={food}
                   onChange={handleQuantityChange}
                   disabled={isLoadingDetail}
+                  compact
                 />
               </div>
 

@@ -1,31 +1,24 @@
-import { MACRO_KEYS } from "@/lib/nutrition/constants";
 import type { NormalizedNutrition } from "@/types/nutrition";
-import { MacroSummaryCard } from "./macro-summary-card";
+import { MacroPills } from "./macro-pills";
 
 interface NutritionPreviewGridProps {
   nutrition: NormalizedNutrition;
   label?: string;
 }
 
-/** Compact per-100g macro tiles for the selected food panel. */
+/** Compact per-100g macro chips for the selected food panel. */
 export function NutritionPreviewGrid({ nutrition, label = "per 100g" }: NutritionPreviewGridProps) {
   return (
     <div>
-      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
         {label}
       </p>
-      <div className="grid grid-cols-5 gap-2">
-        {MACRO_KEYS.map((key) => (
-          <MacroSummaryCard
-            key={key}
-            macroKey={key}
-            value={nutrition[key]}
-            compact
-            showProgress={false}
-            className="!p-2.5"
-          />
-        ))}
-      </div>
+      <MacroPills
+        calories={nutrition.calories}
+        protein={nutrition.protein}
+        carbohydrates={nutrition.carbohydrates}
+        fat={nutrition.fat}
+      />
     </div>
   );
 }
