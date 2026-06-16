@@ -1,8 +1,10 @@
 "use client";
 
-import { Alert } from "@/components/ui/alert";
 import { useMeal } from "@/lib/hooks/use-meal";
+import { UtensilsIcon } from "@/components/ui/icons";
 import { ClearMealButton } from "./clear-meal-button";
+import { ColumnHeader } from "./column-header";
+import { EmptyState } from "./empty-state";
 import { MealIngredientRow } from "./meal-ingredient-row";
 import { NutritionSummaryBar } from "./nutrition-summary-bar";
 
@@ -13,24 +15,23 @@ export function MealPanelColumn() {
     <section aria-label="Current meal" className="flex h-full min-h-0 flex-col">
       <NutritionSummaryBar />
 
-      <div className="mt-4 flex min-h-0 flex-1 flex-col">
-        <div className="mb-3 flex shrink-0 items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500">
-            Ingredients List
-          </h2>
-          {ingredients.length > 0 ? (
-            <span className="text-xs font-medium text-gray-400">
-              {ingredients.length} item{ingredients.length === 1 ? "" : "s"}
-            </span>
-          ) : null}
-        </div>
+      <div className="mt-5 flex min-h-0 flex-1 flex-col">
+        <ColumnHeader
+          title="Ingredients"
+          meta={
+            ingredients.length > 0
+              ? `${ingredients.length} added`
+              : undefined
+          }
+        />
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth">
           {ingredients.length === 0 ? (
-            <Alert variant="empty" className="text-sm">
-              <span className="sr-only">Meal is empty. </span>
-              No ingredients yet. Search for a food and add it to your meal.
-            </Alert>
+            <EmptyState
+              icon={<UtensilsIcon className="h-5 w-5" />}
+              title="Your meal is empty"
+              description="Search for foods, set a quantity, and tap Add To Meal. Items will appear here."
+            />
           ) : (
             <ul className="space-y-2 pb-2">
               {ingredients.map((ingredient) => (

@@ -99,7 +99,7 @@ export function FoodDetailPanel({
                   Clear
                 </Button>
               </div>
-              <h3 className="mt-2 text-xl font-bold leading-tight text-gray-900">
+              <h3 className="mt-2 text-lg font-semibold leading-snug tracking-tight text-gray-900">
                 {food.description}
               </h3>
               <p className="mt-1 text-sm text-gray-500">

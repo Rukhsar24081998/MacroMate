@@ -2,6 +2,7 @@
 
 import { useIsLgUp } from "@/lib/hooks/use-breakpoint";
 import type { FoodSearchState } from "@/types/state";
+import { ColumnHeader } from "./column-header";
 import { FoodDetailEmptyState } from "./food-detail-empty-state";
 import { FoodDetailPanel } from "./food-detail-panel";
 
@@ -16,11 +17,12 @@ export function FoodDetailColumn({ search }: FoodDetailColumnProps) {
 
   return (
     <section aria-label="Selected food" className="flex h-full min-h-0 flex-col">
-      <h2 className="mb-3 shrink-0 text-sm font-bold uppercase tracking-wide text-gray-500">
-        Selected Food
-      </h2>
+      <ColumnHeader
+        title="Selected food"
+        meta={search.selectedFood ? "Configure & add" : undefined}
+      />
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth">
         {!hasSelection ? (
           <FoodDetailEmptyState />
         ) : (

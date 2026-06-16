@@ -46,7 +46,7 @@ export function SearchInput({
         aria-expanded={ariaExpanded}
         aria-activedescendant={ariaActiveDescendant}
         autoComplete="off"
-        className="rounded-xl border-gray-200 bg-surface-muted py-2.5 pl-10 pr-4"
+        className="rounded-xl border-gray-200/90 bg-white py-2.5 pl-10 pr-4 shadow-sm transition-shadow duration-150 focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-100"
       />
       <p id="food-search-hint" className="sr-only">
         Type at least 2 characters. Results from USDA FoodData Central. Use arrow keys to

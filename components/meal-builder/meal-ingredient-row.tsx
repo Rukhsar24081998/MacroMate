@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { CloseIcon } from "@/components/ui/icons";
 import { calculateIngredientNutrition } from "@/lib/nutrition/calculate";
 import { MAX_GRAMS_OR_ML, MAX_SERVINGS } from "@/lib/nutrition/constants";
 import { formatNutrientWithUnit } from "@/lib/nutrition/format";
@@ -11,8 +13,6 @@ import { FoodAvatar } from "./food-avatar";
 import { formatIngredientQuantity } from "./ingredient-info";
 import { NumericInput } from "./numeric-input";
 import { UnitSelector } from "./unit-selector";
-import { CloseIcon } from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
 
 interface MealIngredientRowProps {
   ingredient: Ingredient;
@@ -61,49 +61,57 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
   const inputId = `ingredient-quantity-${ingredient.id}`;
 
   return (
-    <li className="rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
-      <div className="flex items-center gap-3">
-        <FoodAvatar name={ingredient.name} className="h-10 w-10 text-xs" />
+    <li className="group rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-shadow duration-150 hover:border-gray-200 hover:shadow-md">
+      <div className="flex items-start gap-3">
+        <FoodAvatar name={ingredient.name} className="h-10 w-10 shrink-0 text-xs" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-gray-900">{ingredient.name}</p>
-          <p className="mt-0.5 text-xs text-gray-500">
-            {formatIngredientQuantity(ingredient)}
-            {nutrition.calories != null
-              ? ` · ${formatNutrientWithUnit("calories", nutrition.calories)}`
-              : ""}
-          </p>
-          {nutrition.protein != null ? (
-            <p className="mt-0.5 text-xs font-semibold text-brand-700">
-              {formatNutrientWithUnit("protein", nutrition.protein)} protein
+          <div className="flex items-start justify-between gap-2">
+            <p className="truncate text-sm font-semibold leading-snug text-gray-900">
+              {ingredient.name}
             </p>
-          ) : null}
+            {nutrition.calories != null ? (
+              <span className="shrink-0 text-sm font-bold tabular-nums text-gray-900">
+                {formatNutrientWithUnit("calories", nutrition.calories)}
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <p className="text-xs text-gray-500">
+              {formatIngredientQuantity(ingredient)}
+              {nutrition.protein != null ? (
+                <span className="font-medium text-brand-700">
+                  {" · "}
+                  {formatNutrientWithUnit("protein", nutrition.protein)} protein
+                </span>
+              ) : null}
+            </p>
+            <button
+              type="button"
+              onClick={() => removeIngredient(ingredient.id)}
+              className="shrink-0 rounded-md p-1.5 text-gray-300 opacity-100 transition-colors hover:bg-red-50 hover:text-red-600 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
+              aria-label={`Remove ${ingredient.name}`}
+            >
+              <CloseIcon className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => removeIngredient(ingredient.id)}
-          className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-          aria-label={`Remove ${ingredient.name}`}
-        >
-          <CloseIcon className="h-4 w-4" />
-        </button>
       </div>
 
       {!isEditing ? (
-        <Button
+        <button
           type="button"
-          variant="ghost"
           onClick={() => setIsEditing(true)}
-          className="mt-2 h-auto px-0 py-1 text-xs text-brand-700"
+          className="mt-2 text-xs font-medium text-brand-700 underline-offset-2 hover:underline"
           aria-label={`Edit quantity for ${ingredient.name}`}
         >
           Edit quantity
-        </Button>
+        </button>
       ) : null}
 
       {isEditing ? (
         <div className="mt-3 space-y-3 border-t border-gray-100 pt-3">
           <div>
-            <label htmlFor={inputId} className="mb-2 block text-sm font-medium text-gray-700">
+            <label htmlFor={inputId} className="mb-2 block text-xs font-medium text-gray-600">
               Quantity
             </label>
             <NumericInput
@@ -118,7 +126,7 @@ export function MealIngredientRow({ ingredient }: MealIngredientRowProps) {
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">Unit</p>
+            <p className="mb-2 text-xs font-medium text-gray-600">Unit</p>
             <UnitSelector
               unit={unit}
               onUnitChange={setUnit}

@@ -11,7 +11,9 @@ interface NutritionPreviewGridProps {
 export function NutritionPreviewGrid({ nutrition, label = "per 100g" }: NutritionPreviewGridProps) {
   return (
     <div>
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">{label}</p>
+      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+        {label}
+      </p>
       <div className="grid grid-cols-5 gap-2">
         {MACRO_KEYS.map((key) => (
           <MacroSummaryCard

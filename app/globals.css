@@ -25,6 +25,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-surface);
   color: #111827;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .meal-builder-dashboard {

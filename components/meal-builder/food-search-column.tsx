@@ -8,6 +8,7 @@ import {
   shouldShowSearchSkeleton,
 } from "@/lib/search/search-ui";
 import type { FoodSearchState } from "@/types/state";
+import { ColumnHeader } from "./column-header";
 import { SearchAliasNotice } from "./search-alias-notice";
 import { SearchEmptyResults } from "./search-empty-results";
 import { SearchInput } from "./search-input";
@@ -70,11 +71,15 @@ export function FoodSearchColumn({ search }: FoodSearchColumnProps) {
     onDismiss: () => setResultsDismissed(true),
   });
 
+  const resultMeta = showResults
+    ? `${search.results.length} result${search.results.length === 1 ? "" : "s"}`
+    : search.isSearching
+      ? "Searching…"
+      : undefined;
+
   return (
     <section aria-label="Food search" className="flex h-full min-h-0 flex-col">
-      <h2 className="mb-3 shrink-0 text-sm font-bold uppercase tracking-wide text-gray-500">
-        Find Ingredients
-      </h2>
+      <ColumnHeader title="Find ingredients" meta={resultMeta} />
 
       <div className="shrink-0">
         <SearchInput
@@ -100,7 +105,7 @@ export function FoodSearchColumn({ search }: FoodSearchColumnProps) {
         />
       </div>
 
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto scroll-smooth">
         {showSearchSkeleton ? <SearchResultsSkeleton /> : null}
 
         {showAliasNotice ? (
