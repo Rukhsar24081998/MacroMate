@@ -1,15 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { useFoodSearch } from "@/lib/hooks/use-food-search";
 import { useSearchKeyboard } from "@/lib/hooks/use-search-keyboard";
 import {
   shouldShowAliasNotice,
   shouldShowEmptyResults,
   shouldShowSearchSkeleton,
 } from "@/lib/search/search-ui";
-import { FoodDetailPanel } from "./food-detail-panel";
+import type { FoodSearchState } from "@/types/state";
 import { SearchAliasNotice } from "./search-alias-notice";
 import { SearchEmptyResults } from "./search-empty-results";
 import { SearchInput } from "./search-input";
@@ -17,8 +15,11 @@ import { SearchResultsList } from "./search-results-list";
 import { SearchResultsSkeleton } from "./search-results-skeleton";
 import { SearchStatus } from "./search-status";
 
-export function FoodSearchSection() {
-  const search = useFoodSearch();
+interface FoodSearchColumnProps {
+  search: FoodSearchState;
+}
+
+export function FoodSearchColumn({ search }: FoodSearchColumnProps) {
   const [resultsDismissed, setResultsDismissed] = useState(false);
   const queryLength = search.query.trim().length;
   const hasError = search.error != null;
@@ -70,63 +71,55 @@ export function FoodSearchSection() {
   });
 
   return (
-    <section aria-label="Food search" className="space-y-6">
-      <Card>
-        <h2 className="text-lg font-bold text-gray-900">Find Ingredients</h2>
-        <div className="mt-4">
-          <SearchInput
-            value={search.query}
-            onChange={search.setQuery}
-            onKeyDown={handleKeyDown}
-            isLoading={search.isSearching}
-            aria-controls="food-search-results"
-            aria-expanded={showResults}
-            aria-activedescendant={
-              showResults && highlightedIndex >= 0
-                ? `search-result-${search.results[highlightedIndex]?.fdcId}`
-                : undefined
-            }
-          />
-        </div>
+    <section aria-label="Food search" className="flex h-full min-h-0 flex-col">
+      <h2 className="mb-3 shrink-0 text-sm font-bold uppercase tracking-wide text-gray-500">
+        Find Ingredients
+      </h2>
 
-        <div className="mt-3" aria-live="polite">
-          <SearchStatus
-            queryLength={queryLength}
-            error={search.error}
-            onRetry={search.retrySearch}
-          />
-        </div>
+      <div className="shrink-0">
+        <SearchInput
+          value={search.query}
+          onChange={search.setQuery}
+          onKeyDown={handleKeyDown}
+          isLoading={search.isSearching}
+          aria-controls="food-search-results"
+          aria-expanded={showResults}
+          aria-activedescendant={
+            showResults && highlightedIndex >= 0
+              ? `search-result-${search.results[highlightedIndex]?.fdcId}`
+              : undefined
+          }
+        />
+      </div>
 
+      <div className="mt-2 shrink-0" aria-live="polite">
+        <SearchStatus
+          queryLength={queryLength}
+          error={search.error}
+          onRetry={search.retrySearch}
+        />
+      </div>
+
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
         {showSearchSkeleton ? <SearchResultsSkeleton /> : null}
 
         {showAliasNotice ? (
-          <SearchAliasNotice
-            normalizedQuery={search.searchNormalization!.normalizedQuery}
-          />
+          <SearchAliasNotice normalizedQuery={search.searchNormalization!.normalizedQuery} />
         ) : null}
 
         {showEmptyResults ? <SearchEmptyResults /> : null}
 
         {showResults ? (
-          <Card id="food-search-results" className="mt-4 overflow-hidden p-0 shadow-none">
+          <div id="food-search-results" className="pb-2">
             <SearchResultsList
               foods={search.results}
               selectedFdcId={search.selectedFood?.fdcId ?? null}
               highlightedIndex={highlightedIndex}
               onSelect={(fdcId) => void search.selectFood(fdcId)}
             />
-          </Card>
+          </div>
         ) : null}
-      </Card>
-
-      <FoodDetailPanel
-        food={search.selectedFood}
-        nutrition={search.selectedNutrition}
-        isLoadingDetail={search.isLoadingDetail}
-        error={search.detailError}
-        onClear={search.clearSelection}
-        onRetry={search.retryDetail}
-      />
+      </div>
     </section>
   );
 }

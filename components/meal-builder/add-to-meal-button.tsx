@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { PlusIcon } from "@/components/ui/icons";
 import { resolveServingSizeGrams } from "@/lib/nutrition/convert";
 import { useMeal } from "@/lib/hooks/use-meal";
 import type { NormalizedFoodSummary } from "@/types/food";
@@ -41,7 +42,8 @@ export function AddToMealButton({
   };
 
   return (
-    <Button type="button" onClick={handleAdd} disabled={!canAdd} className="mt-4 w-full">
+    <Button type="button" onClick={handleAdd} disabled={!canAdd} className="w-full">
+      <PlusIcon className="h-4 w-4" />
       Add To Meal
     </Button>
   );

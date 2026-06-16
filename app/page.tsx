@@ -16,12 +16,9 @@ export default function HomePage() {
           MacroMate helps you search ingredients, set quantities, and calculate calories and
           macronutrients in under a minute.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-8">
           <Link href="/meal-builder">
-            <Button className="min-w-[160px]">Build a Meal</Button>
-          </Link>
-          <Link href="/meal-builder">
-            <Button variant="outline">Try Meal Builder</Button>
+            <Button className="min-w-[180px]">Open Meal Builder</Button>
           </Link>
         </div>
       </div>
@@ -29,8 +26,8 @@ export default function HomePage() {
       <Card className="overflow-hidden p-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/screens/meal-builder-desktop.png"
-          alt="MacroMate meal builder preview"
+          src="/screens/stitch-meal-builder-reference.png"
+          alt="MacroMate dashboard meal builder"
           className="h-full w-full object-cover object-top"
         />
       </Card>

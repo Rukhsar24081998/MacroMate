@@ -8,6 +8,8 @@ interface UseFoodDetailRevealOptions {
   /** When true, focus moves to the quantity field (after nutrition loads). */
   isReadyToFocus: boolean;
   onFocusQuantity: () => void;
+  /** Scroll + highlight (mobile stacked layout). Off on desktop dashboard. */
+  enableScrollReveal?: boolean;
 }
 
 function prefersReducedMotion(): boolean {
@@ -21,6 +23,7 @@ export function useFoodDetailReveal({
   fdcId,
   isReadyToFocus,
   onFocusQuantity,
+  enableScrollReveal = true,
 }: UseFoodDetailRevealOptions) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [highlighted, setHighlighted] = useState(false);
@@ -34,6 +37,8 @@ export function useFoodDetailReveal({
       setHighlighted(false);
       return;
     }
+
+    if (!enableScrollReveal) return;
 
     if (lastScrolledFdcId.current === fdcId) return;
 
@@ -51,7 +56,7 @@ export function useFoodDetailReveal({
     });
 
     return () => window.clearTimeout(highlightTimer);
-  }, [fdcId]);
+  }, [fdcId, enableScrollReveal]);
 
   useEffect(() => {
     if (fdcId == null || !isReadyToFocus) return;

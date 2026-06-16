@@ -17,7 +17,7 @@ export function SearchResultsList({
   if (foods.length === 0) return null;
 
   return (
-    <ul role="listbox" aria-label="Food search results" className="divide-y divide-gray-100">
+    <ul role="listbox" aria-label="Food search results" className="space-y-2">
       {foods.map((food, index) => (
         <SearchResultItem
           key={food.fdcId}

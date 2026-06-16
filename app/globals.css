@@ -27,12 +27,10 @@ body {
   color: #111827;
 }
 
-#food-detail-panel {
-  scroll-margin-top: 1rem;
+.meal-builder-dashboard {
+  --meal-builder-header-offset: 4.5rem;
 }
 
-@media (min-width: 768px) {
-  #food-detail-panel {
-    scroll-margin-top: 1.5rem;
-  }
+#food-detail-panel {
+  scroll-margin-top: 1rem;
 }

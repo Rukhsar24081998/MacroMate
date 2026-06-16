@@ -3,18 +3,13 @@
 import { useCallback, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ScaleIcon } from "@/components/ui/icons";
 import { useFoodDetailReveal } from "@/lib/hooks/use-food-detail-reveal";
-import { scaleNutrition } from "@/lib/nutrition/calculate";
-import { MACRO_KEYS, UNIT_SHORT_LABELS } from "@/lib/nutrition/constants";
 import { cn } from "@/lib/utils/cn";
 import type { NormalizedFoodSummary } from "@/types/food";
 import type { NormalizedNutrition } from "@/types/nutrition";
-import { FoodInfoHeader } from "./food-info-header";
 import { AddToMealButton } from "./add-to-meal-button";
 import { FoodDetailSkeleton } from "./food-detail-skeleton";
-import { MacroStatCard } from "./macro-stat-card";
+import { NutritionPreviewGrid } from "./nutrition-preview-grid";
 import { QuantityInput, type QuantityValue } from "./quantity-input";
 
 interface FoodDetailPanelProps {
@@ -24,23 +19,13 @@ interface FoodDetailPanelProps {
   error: string | null;
   onClear: () => void;
   onRetry: () => void;
+  enableScrollReveal?: boolean;
 }
 
-function formatQuantityLabel(value: QuantityValue): string {
-  const unitLabel = value.unit === "serving" && value.quantity !== 1
-    ? `${UNIT_SHORT_LABELS.serving}s`
-    : UNIT_SHORT_LABELS[value.unit];
-  return `${value.quantity} ${unitLabel}`;
-}
-
-function NutritionGrid({ nutrition }: { nutrition: NormalizedNutrition }) {
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {MACRO_KEYS.map((key) => (
-        <MacroStatCard key={key} macroKey={key} value={nutrition[key]} />
-      ))}
-    </div>
-  );
+function dataTypeBadgeClass(dataType: string): string {
+  if (dataType === "Foundation") return "bg-brand-100 text-brand-800";
+  if (dataType === "SR Legacy") return "bg-blue-100 text-blue-800";
+  return "bg-gray-100 text-gray-700";
 }
 
 export function FoodDetailPanel({
@@ -50,6 +35,7 @@ export function FoodDetailPanel({
   error,
   onClear,
   onRetry,
+  enableScrollReveal = true,
 }: FoodDetailPanelProps) {
   const [quantityValue, setQuantityValue] = useState<QuantityValue | null>(null);
 
@@ -69,14 +55,10 @@ export function FoodDetailPanel({
     fdcId: food?.fdcId,
     isReadyToFocus,
     onFocusQuantity: focusQuantityInput,
+    enableScrollReveal,
   });
 
   if (!food && !isLoadingDetail && !error) return null;
-
-  const scaledNutrition =
-    nutrition && quantityValue?.isValid
-      ? scaleNutrition(nutrition, quantityValue.effectiveGrams)
-      : null;
 
   const showSkeleton = isLoadingDetail && !nutrition;
 
@@ -85,7 +67,7 @@ export function FoodDetailPanel({
       id="food-detail-panel"
       ref={panelRef}
       role="region"
-      aria-label="Configure addition"
+      aria-label="Selected food details"
       aria-live="polite"
       className={cn(
         "rounded-2xl transition-[box-shadow,background-color] duration-500",
@@ -96,79 +78,71 @@ export function FoodDetailPanel({
       {showSkeleton ? (
         <FoodDetailSkeleton food={food} />
       ) : (
-        <Card className="overflow-hidden border-brand-200 p-0 shadow-none">
-          <div className="border-t-4 border-brand-700 px-5 pt-5">
-            <div className="flex items-center gap-2">
-              <ScaleIcon className="h-5 w-5 text-brand-700" />
-              <h2 className="text-lg font-bold text-gray-900">Configure Addition</h2>
-            </div>
-            <p className="mt-1 text-sm text-gray-500">Set quantity and add to your meal</p>
-          </div>
-
-          <div className="px-5 pb-5">
-            {food ? <FoodInfoHeader food={food} className="mt-4" /> : null}
-
-            {error && food ? (
-              <Alert
-                variant="error"
-                title="Could not load details"
-                action={
-                  <Button variant="secondary" onClick={onRetry}>
-                    Retry
-                  </Button>
-                }
-                className="mt-4"
-              >
-                {error}
-              </Alert>
-            ) : null}
-
-            {nutrition && food ? (
-              <>
-                <div className="mt-4 hidden rounded-xl bg-surface-muted p-4 sm:block">
-                  <p className="mb-2 text-sm font-semibold text-gray-900">Nutrition per 100g</p>
-                  <NutritionGrid nutrition={nutrition} />
-                </div>
-
-                <div className="mt-5 rounded-2xl bg-surface-muted p-4">
-                  <QuantityInput
-                    food={food}
-                    onChange={handleQuantityChange}
-                    disabled={isLoadingDetail}
-                  />
-                </div>
-
-                {scaledNutrition && quantityValue ? (
-                  <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
-                    <p className="mb-2 text-sm font-semibold text-gray-900">
-                      Nutrition for {formatQuantityLabel(quantityValue)}
-                      <span className="font-normal text-gray-600">
-                        {" "}
-                        ({Math.round(quantityValue.effectiveGrams)}g)
-                      </span>
-                    </p>
-                    <NutritionGrid nutrition={scaledNutrition} />
-                  </div>
-                ) : null}
-
-                <AddToMealButton
-                  food={food}
-                  nutrition={nutrition}
-                  quantityValue={quantityValue}
-                  disabled={isLoadingDetail}
-                />
-              </>
-            ) : null}
-
-            {food ? (
-              <div className="mt-3">
-                <Button variant="ghost" onClick={onClear} className="px-0 text-gray-500">
-                  Clear selection
+        <div className="space-y-4">
+          {food ? (
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                    dataTypeBadgeClass(food.dataType),
+                  )}
+                >
+                  {food.dataType}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onClear}
+                  className="h-auto px-2 py-1 text-xs text-gray-400"
+                >
+                  Clear
                 </Button>
               </div>
-            ) : null}
-          </div>
-        </Card>
+              <h3 className="mt-2 text-xl font-bold leading-tight text-gray-900">
+                {food.description}
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {food.brandOwner ?? "USDA FoodData Central · per 100g"}
+              </p>
+            </div>
+          ) : null}
+
+          {error && food ? (
+            <Alert
+              variant="error"
+              title="Could not load details"
+              action={
+                <Button variant="secondary" onClick={onRetry}>
+                  Retry
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
+          ) : null}
+
+          {nutrition && food ? (
+            <>
+              <NutritionPreviewGrid nutrition={nutrition} />
+
+              <div className="rounded-xl bg-surface-muted p-4">
+                <QuantityInput
+                  food={food}
+                  onChange={handleQuantityChange}
+                  disabled={isLoadingDetail}
+                />
+              </div>
+
+              <AddToMealButton
+                food={food}
+                nutrition={nutrition}
+                quantityValue={quantityValue}
+                disabled={isLoadingDetail}
+              />
+            </>
+          ) : null}
+        </div>
       )}
 
       {food && highlighted ? (
