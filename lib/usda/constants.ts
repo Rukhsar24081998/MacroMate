@@ -1,6 +1,10 @@
 /** USDA FoodData Central nutrient IDs */
 export const NUTRIENT_IDS = {
   ENERGY_KCAL: 1008,
+  /** Foundation Foods — Metabolizable Energy (Atwater General Factor) */
+  ENERGY_ATWATER_GENERAL: 2047,
+  /** Foundation Foods — Metabolizable Energy (Atwater Specific Factor) */
+  ENERGY_ATWATER_SPECIFIC: 2048,
   ENERGY_KJ: 1062,
   PROTEIN: 1003,
   CARBOHYDRATES: 1005,

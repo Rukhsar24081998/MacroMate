@@ -67,6 +67,12 @@ export function extractNutrition(raw: UsdaFoodDetail): NormalizedNutrition {
 
   let calories = findNutrientAmount(nutrients, NUTRIENT_IDS.ENERGY_KCAL);
   if (calories == null) {
+    calories = findNutrientAmount(nutrients, NUTRIENT_IDS.ENERGY_ATWATER_GENERAL);
+  }
+  if (calories == null) {
+    calories = findNutrientAmount(nutrients, NUTRIENT_IDS.ENERGY_ATWATER_SPECIFIC);
+  }
+  if (calories == null) {
     const kj = findNutrientAmount(nutrients, NUTRIENT_IDS.ENERGY_KJ);
     if (kj != null) calories = kj / 4.184;
   }
