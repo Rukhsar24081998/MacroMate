@@ -50,6 +50,49 @@ Session persistence via `sessionStorage` lets users refresh the page without los
 
 ---
 
+## Features
+
+- **USDA food search** — debounced search with loading, empty, and error states
+- **Search normalization** — search normalization framework for improving food discoverability and USDA search compatibility
+- **Quantity input** — grams, milliliters, or servings (when USDA serving data exists)
+- **Meal builder** — add, edit, and remove multiple ingredients
+- **Nutrition summary** — calories, protein, carbs, fat, and fiber totals
+- **Session persistence** — meal survives page refresh via `sessionStorage`
+- **Keyboard search** — arrow keys, Enter, and Escape for mouse-free selection
+- **Mobile-friendly layout** — responsive meal builder with accessible tap targets
+
+---
+
+## Screenshots
+
+Product gallery — capture live app screenshots to [`docs/screenshots/`](docs/screenshots/) after deployment.
+
+### Dashboard
+
+Three-column meal builder: search, selected food, and meal summary visible at once.
+
+![MacroMate dashboard — three-column meal builder](docs/screenshots/meal-builder-dashboard.png)
+
+### Food Search
+
+Debounced USDA search with data-type badges, alias normalization, and keyboard navigation.
+
+![MacroMate food search with results](docs/screenshots/meal-builder-search.png)
+
+### Meal Summary
+
+Running calorie and macro totals with per-ingredient breakdown.
+
+![MacroMate meal summary with ingredients](docs/screenshots/meal-builder-meal-summary.png)
+
+### Mobile
+
+Stacked layout with the same search → quantity → add → summary workflow.
+
+![MacroMate mobile meal builder](docs/screenshots/meal-builder-mobile.png)
+
+---
+
 ## Architecture
 
 ![MacroMate Architecture](docs/screenshots/architecture-diagram.png)
@@ -83,19 +126,6 @@ See [`docs/technical_architecture.md`](docs/technical_architecture.md) for the f
 
 ---
 
-## Features
-
-- **USDA food search** — debounced search with loading, empty, and error states
-- **Search normalization** — search normalization framework for improving food discoverability and USDA search compatibility
-- **Quantity input** — grams, milliliters, or servings (when USDA serving data exists)
-- **Meal builder** — add, edit, and remove multiple ingredients
-- **Nutrition summary** — calories, protein, carbs, fat, and fiber totals
-- **Session persistence** — meal survives page refresh via `sessionStorage`
-- **Keyboard search** — arrow keys, Enter, and Escape for mouse-free selection
-- **Mobile-friendly layout** — responsive meal builder with accessible tap targets
-
----
-
 ## Tech Stack
 
 | Layer | Technology |
@@ -107,28 +137,6 @@ See [`docs/technical_architecture.md`](docs/technical_architecture.md) for the f
 | State | React Context + custom hooks |
 | Persistence | `sessionStorage` (meal only) |
 | Tests | Vitest + Testing Library |
-
----
-
-## Screenshots
-
-![MacroMate Architecture](docs/screenshots/architecture-diagram.png)
-
-_Add portfolio screenshots to [`docs/screenshots/`](docs/screenshots/) after deployment:_
-
-| File | Description |
-|------|-------------|
-| `meal-builder-empty.png` | Empty meal builder with search |
-| `meal-builder-search.png` | Search results with alias notice |
-| `meal-builder-ingredients.png` | Meal with multiple ingredients |
-| `meal-builder-mobile.png` | Mobile layout |
-| `nutrition-summary.png` | Nutrition totals panel |
-
-Example markdown once images are added:
-
-```markdown
-![Meal Builder](docs/screenshots/meal-builder-ingredients.png)
-```
 
 ---
 
