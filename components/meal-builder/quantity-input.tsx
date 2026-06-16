@@ -94,7 +94,7 @@ export function QuantityInput({ food, onChange, disabled, compact }: QuantityInp
           />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <p className={labelClass}>Unit</p>
           <UnitSelector
             unit={unit}

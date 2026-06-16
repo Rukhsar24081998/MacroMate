@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
-import { UNIT_LABELS } from "@/lib/nutrition/constants";
+import { UNIT_LABELS, UNIT_SHORT_LABELS } from "@/lib/nutrition/constants";
 import type { Unit } from "@/types/ingredient";
 
 interface UnitSelectorProps {
@@ -22,15 +22,16 @@ export function UnitSelector({
   disabled,
 }: UnitSelectorProps) {
   return (
-    <div role="group" aria-label="Unit" className="flex gap-2">
+    <div role="group" aria-label="Unit" className="grid w-full min-w-0 grid-cols-3 gap-1.5">
       {UNITS.map((option) => {
         const isServing = option === "serving";
         const isServingUnavailable = isServing && !servingAvailable;
         const isOptionDisabled = Boolean(disabled) || isServingUnavailable;
         const isSelected = unit === option && !isServingUnavailable;
+        const label = UNIT_SHORT_LABELS[option];
 
         const buttonClass = cn(
-          "w-full rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors",
+          "min-w-0 rounded-lg border px-1.5 py-2 text-center text-[11px] font-semibold leading-tight transition-colors sm:text-xs",
           isSelected
             ? "border-brand-800 bg-brand-800 text-white"
             : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
@@ -43,7 +44,7 @@ export function UnitSelector({
           return (
             <span
               key={option}
-              className="relative flex flex-1 outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1"
+              className="relative min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-brand-700 focus-visible:ring-offset-1"
               title={SERVING_UNAVAILABLE_MESSAGE}
               tabIndex={disabled ? -1 : 0}
               aria-disabled="true"
@@ -51,9 +52,9 @@ export function UnitSelector({
             >
               <span
                 aria-hidden="true"
-                className={cn(buttonClass, "pointer-events-none block select-none text-center")}
+                className={cn(buttonClass, "pointer-events-none block select-none truncate")}
               >
-                {UNIT_LABELS[option]}
+                {label}
               </span>
             </span>
           );
@@ -66,9 +67,11 @@ export function UnitSelector({
             onClick={() => onUnitChange(option)}
             disabled={isOptionDisabled}
             aria-pressed={isSelected}
-            className={cn(buttonClass, "flex-1")}
+            aria-label={UNIT_LABELS[option]}
+            title={UNIT_LABELS[option]}
+            className={cn(buttonClass, "truncate")}
           >
-            {UNIT_LABELS[option]}
+            {label}
           </button>
         );
       })}
